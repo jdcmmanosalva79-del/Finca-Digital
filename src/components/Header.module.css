@@ -1,0 +1,109 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  height: var(--header-height);
+  background: var(--white);
+  border-bottom: 1px solid var(--cream-dark);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 99;
+  box-shadow: var(--shadow-sm);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.logo svg {
+  width: 100%;
+  height: 100%;
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+}
+
+.brandTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--gray-900);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.brandSubtitle {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--gray-500);
+  margin-top: 2px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all var(--transition);
+  letter-spacing: 0.01em;
+}
+
+.btn svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.btnTeal {
+  background: var(--teal);
+  color: var(--white);
+}
+
+.btnTeal:hover {
+  background: var(--teal-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(42, 125, 111, 0.35);
+}
+
+.btnGold {
+  background: var(--gold);
+  color: var(--white);
+}
+
+.btnGold:hover {
+  background: #a6700a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(200, 134, 10, 0.35);
+}
+
+.btnDark {
+  background: var(--gray-800);
+  color: var(--white);
+}
+
+.btnDark:hover {
+  background: var(--gray-900);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}

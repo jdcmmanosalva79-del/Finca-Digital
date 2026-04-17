@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --teal-dark: #1a5f5a;
+  --teal: #2a7d6f;
+  --teal-light: #3a9e8a;
+  --teal-pale: #e8f5f2;
+  --gold: #c8860a;
+  --gold-light: #f0a429;
+  --gold-pale: #fef6e4;
+  --cream: #f7f3ee;
+  --cream-dark: #ede8e0;
+  --brown: #6b4c2a;
+  --gray-100: #f8f9fa;
+  --gray-200: #e9ecef;
+  --gray-300: #dee2e6;
+  --gray-400: #ced4da;
+  --gray-500: #adb5bd;
+  --gray-600: #6c757d;
+  --gray-700: #495057;
+  --gray-800: #343a40;
+  --gray-900: #212529;
+  --white: #ffffff;
+  --sidebar-width: 70px;
+  --header-height: 72px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.06);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --transition: 0.2s ease;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--cream);
+  color: var(--gray-800);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }

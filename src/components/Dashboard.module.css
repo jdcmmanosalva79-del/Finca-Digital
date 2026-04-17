@@ -1,0 +1,372 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* ── TOP ROW ── */
+.topRow {
+  display: grid;
+  grid-template-columns: 220px 1fr 280px;
+  gap: 14px;
+  min-height: 260px;
+}
+
+/* User Card */
+.userCard {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--cream-dark);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.userCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sectionIcon {
+  font-size: 16px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--cream-dark);
+}
+
+.userAvatar {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.userAvatar svg {
+  width: 100%;
+  height: 100%;
+}
+
+.userTitle {
+  display: flex;
+  flex-direction: column;
+}
+
+.userRole {
+  font-size: 12px;
+  color: var(--gray-500);
+  font-weight: 400;
+}
+
+.userRoleBig {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-900);
+  line-height: 1.2;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.userField {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.fieldLabel {
+  font-size: 10px;
+  color: var(--gray-400);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.fieldValue {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-800);
+}
+
+.fieldValueStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25); }
+  50% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15); }
+}
+
+/* Map Card */
+.mapCard {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  min-height: 220px;
+}
+
+/* Stat Cards Column */
+.statCards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.statCard {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--cream-dark);
+  cursor: pointer;
+  transition: all var(--transition);
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.statCard::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--card-color);
+  border-radius: 4px 0 0 4px;
+  transition: width var(--transition);
+}
+
+.statCard:hover {
+  transform: translateX(3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--card-color);
+}
+
+.statCard:hover::before {
+  width: 6px;
+}
+
+.statCardActive {
+  background: var(--card-bg) !important;
+  border-color: var(--card-color) !important;
+}
+
+.statLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statCount {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.statTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.statSub {
+  font-size: 11px;
+  color: var(--gray-500);
+}
+
+.statLink {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-500);
+  background: none;
+  padding: 0;
+  margin-top: 4px;
+  text-align: left;
+  transition: color var(--transition);
+}
+
+.statCard:hover .statLink {
+  color: var(--card-color);
+}
+
+.statIcon {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.statIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── BOTTOM ROW ── */
+.bottomRow {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cultivoGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+/* Cultivo Card */
+.cultivoCard {
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  min-height: 160px;
+}
+
+.cultivoCard:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.cultivoHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cultivoInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cultivoEmoji {
+  font-size: 18px;
+}
+
+.cultivoName {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.cultivoCount {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.cultivoSub {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 11px;
+  color: var(--gray-500);
+  font-weight: 400;
+}
+
+.cultivoChart {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cultivoImageBg {
+  position: absolute;
+  bottom: -10px;
+  left: -10px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.45;
+  transition: opacity var(--transition);
+}
+
+.cultivoCard:hover .cultivoImageBg {
+  opacity: 0.6;
+}
+
+.cultivoBigEmoji {
+  font-size: 70px;
+  filter: saturate(1.2);
+  transform: rotate(-10deg);
+  display: block;
+}
+
+.addBtn {
+  background: var(--teal);
+  color: var(--white);
+  border: none;
+  border-radius: 4px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all var(--transition);
+  line-height: 1;
+}
+
+.addBtn:hover {
+  background: var(--teal-dark);
+  transform: scale(1.1);
+}
+

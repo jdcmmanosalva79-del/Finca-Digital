@@ -1,0 +1,49 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 32px;
+}
+
+.card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 48px 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--cream-dark);
+  text-align: center;
+  max-width: 400px;
+}
+
+.icon {
+  font-size: 64px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.desc {
+  font-size: 14px;
+  color: var(--gray-500);
+  line-height: 1.6;
+}
+
+.badge {
+  margin-top: 8px;
+  padding: 8px 24px;
+  background: var(--teal-pale);
+  color: var(--teal);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
