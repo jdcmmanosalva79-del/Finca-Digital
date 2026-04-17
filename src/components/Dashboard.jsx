@@ -65,19 +65,6 @@ export default function Dashboard() {
     return <div style={{ padding: 20 }}>Cargando datos del Dashboard...</div>;
   }
 
-  const handleAddCampo = (cropId) => {
-    const currentCrop = data.cultivos[cropId];
-    const newDataPoint = Math.floor(Math.random() * 3) + currentCrop.count;
-    const newData = [...(currentCrop.data || []), newDataPoint].slice(-8);
-
-    updateCrop(cropId, {
-      campos: currentCrop.campos + 1,
-      count: currentCrop.count + 1,
-      data: newData,
-      hectareas: `${((currentCrop.campos + 1) * 0.8).toFixed(1)} ha totales`
-    });
-  };
-
   const statCardsData = Object.keys(STAT_CONFIG).map(key => ({
     ...STAT_CONFIG[key],
     ...data.stats[key]
@@ -164,15 +151,22 @@ export default function Dashboard() {
       <div className={styles.bottomRow}>
         <div className={styles.sectionHeader}>
           <span className={styles.sectionIcon}>🌿</span>
-          <h2 className={styles.sectionTitle}>Resumen de Cultivos</h2>
+          <h2 className={styles.sectionTitle}>Resumen de Cultivos Activos</h2>
         </div>
-        <div className={styles.cultivoGrid}>
-          {cultivosData.map((c) => (
-            <div
-              key={c.id}
-              className={styles.cultivoCard}
-              style={{ background: c.bgGradient }}
-            >
+        {cultivosData.filter(c => c.campos > 0).length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px', background: 'var(--white)', borderRadius: 'var(--radius-lg)', color: 'var(--gray-500)', boxShadow: 'var(--shadow-sm)' }}>
+            <span style={{ fontSize: '32px', display: 'block', marginBottom: '10px' }}>🌱</span>
+            No tienes siembras activas en este momento.<br/>
+            Ve a la sección <b>Cultivos</b> para registrar una nueva siembra.
+          </div>
+        ) : (
+          <div className={styles.cultivoGrid}>
+            {cultivosData.filter(c => c.campos > 0).map((c) => (
+              <div
+                key={c.id}
+                className={styles.cultivoCard}
+                style={{ background: c.bgGradient }}
+              >
               <div className={styles.cultivoHeader}>
                 <div className={styles.cultivoInfo}>
                   <div className={styles.cultivoEmoji}>{c.emoji}</div>
@@ -185,13 +179,6 @@ export default function Dashboard() {
               <div className={styles.cultivoSub}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   {c.campos} {c.campos === 1 ? 'campo activo' : 'campos activos'}
-                  <button 
-                    className={styles.addBtn}
-                    onClick={(e) => { e.stopPropagation(); handleAddCampo(c.id); }}
-                    title={`Añadir campo de ${c.name}`}
-                  >
-                    +
-                  </button>
                 </div>
                 <div>{c.hectareas}</div>
               </div>
@@ -211,6 +198,7 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,19 @@
+const { initializeApp } = require("firebase/app");
+const { getFirestore } = require("firebase/firestore");
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCEaEX4e7DIaK_qRUp2ovzl8nkeWOVfWgQ",
+  authDomain: "finca-digital-51f2f.firebaseapp.com",
+  databaseURL: "https://finca-digital-51f2f-default-rtdb.firebaseio.com",
+  projectId: "finca-digital-51f2f",
+  storageBucket: "finca-digital-51f2f.firebasestorage.app",
+  messagingSenderId: "920614478954",
+  appId: "1:920614478954:web:dce766c98375133b425613",
+  measurementId: "G-NDZ4B6TVST"
+};
+
+// Initialize Firebase using the standard web client
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+module.exports = { app, db };

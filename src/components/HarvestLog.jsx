@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { db } from '../firebase';
 import { useAppContext } from '../context/AppContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -6,6 +8,26 @@ import styles from './PlaceholderPage.module.css';
 
 export default function HarvestLog() {
   const { data, addFertilizationLog } = useAppContext();
+
+  // ── Ciclos desde Firestore ──
+  const [ciclosFinalizados, setCiclosFinalizados] = useState([]);
+  const [ciclosActivos, setCiclosActivos] = useState([]);
+
+  useEffect(() => {
+    // Escuchar finalizados
+    const qFin = query(collection(db, 'crops'), where('estado', '==', 'finalizado'));
+    const unsubFin = onSnapshot(qFin, (snap) => {
+      setCiclosFinalizados(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+
+    // Escuchar activos para mostrarlos en el reporte
+    const qAct = query(collection(db, 'crops'), where('estado', '==', 'activo'));
+    const unsubAct = onSnapshot(qAct, (snap) => {
+      setCiclosActivos(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+
+    return () => { unsubFin(); unsubAct(); };
+  }, []);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -211,6 +233,101 @@ export default function HarvestLog() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ── Resumen de Cultivos Activos ── */}
+      <div style={{ background: 'var(--white)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)', padding: '24px', marginTop: '4px' }}>
+        <h2 style={{ fontSize: '18px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>🌱</span> Siembras Activas Actuales
+        </h2>
+        {ciclosActivos.length === 0 ? (
+          <p style={{ color: 'var(--gray-400)', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>
+            No hay siembras activas en este momento.
+          </p>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid var(--cream-dark)', textAlign: 'left', color: 'var(--gray-500)' }}>
+                  <th style={{ padding: '12px 8px' }}>Rubro</th>
+                  <th style={{ padding: '12px 8px' }}>Lote</th>
+                  <th style={{ padding: '12px 8px' }}>Hectáreas</th>
+                  <th style={{ padding: '12px 8px' }}>Fecha Siembra</th>
+                  <th style={{ padding: '12px 8px' }}>Fecha Finalización Estimada</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ciclosActivos.map(c => {
+                  const fechaSiembra = c.fechaSiembra?.toDate?.()?.toLocaleDateString('es-VE') || '—';
+                  const fechaFin = c.fechaFinalizacion?.toDate?.()?.toLocaleDateString('es-VE') || '—';
+                  return (
+                    <tr key={c.id} style={{ borderBottom: '1px solid var(--cream-dark)' }}>
+                      <td style={{ padding: '12px 8px', fontWeight: '600' }}>
+                        {c.rubro === 'Maíz' ? '🌽' : c.rubro === 'Cacao' ? '🍫' : c.rubro === 'Yuca' ? '🥔' : '🍌'} {c.rubro}
+                      </td>
+                      <td style={{ padding: '12px 8px' }}>{c.lote}</td>
+                      <td style={{ padding: '12px 8px' }}>{c.hectareas} ha</td>
+                      <td style={{ padding: '12px 8px', color: 'var(--gray-600)' }}>{fechaSiembra}</td>
+                      <td style={{ padding: '12px 8px', color: 'var(--teal-dark)' }}>{fechaFin}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* ── Historial de Rendimientos (ciclos finalizados de Firestore) ── */}
+      <div style={{ background: 'var(--white)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)', padding: '24px', marginTop: '4px' }}>
+        <h2 style={{ fontSize: '18px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>🏁</span> Ciclos Finalizados — Rendimientos
+        </h2>
+        {ciclosFinalizados.length === 0 ? (
+          <p style={{ color: 'var(--gray-400)', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>
+            Aún no hay ciclos finalizados. Al llegar al día 120 podrás registrar el rendimiento desde el Panel de Alertas.
+          </p>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid var(--cream-dark)', textAlign: 'left', color: 'var(--gray-500)' }}>
+                  <th style={{ padding: '12px 8px' }}>Rubro</th>
+                  <th style={{ padding: '12px 8px' }}>Lote</th>
+                  <th style={{ padding: '12px 8px' }}>Hectáreas</th>
+                  <th style={{ padding: '12px 8px' }}>Siembra</th>
+                  <th style={{ padding: '12px 8px' }}>Finalizado</th>
+                  <th style={{ padding: '12px 8px', color: 'var(--teal-dark)' }}>Rendimiento (KG)</th>
+                  <th style={{ padding: '12px 8px' }}>KG / ha</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ciclosFinalizados.map(c => {
+                  const fechaSiembra   = c.fechaSiembra?.toDate?.()?.toLocaleDateString('es-VE') || '—';
+                  const fechaFinalizado = c.finalizadoEn?.toDate?.()?.toLocaleDateString('es-VE') || '—';
+                  const kgHa = c.rendimientoKg && c.hectareas ? Math.round(c.rendimientoKg / c.hectareas) : '—';
+                  return (
+                    <tr key={c.id} style={{ borderBottom: '1px solid var(--cream-dark)' }}>
+                      <td style={{ padding: '12px 8px', fontWeight: '600' }}>
+                        {c.rubro === 'Maíz' ? '🌽' : c.rubro === 'Cacao' ? '🍫' : c.rubro === 'Yuca' ? '🥔' : '🍌'} {c.rubro}
+                      </td>
+                      <td style={{ padding: '12px 8px' }}>{c.lote}</td>
+                      <td style={{ padding: '12px 8px' }}>{c.hectareas} ha</td>
+                      <td style={{ padding: '12px 8px', color: 'var(--gray-600)' }}>{fechaSiembra}</td>
+                      <td style={{ padding: '12px 8px', color: 'var(--gray-600)' }}>{fechaFinalizado}</td>
+                      <td style={{ padding: '12px 8px', color: 'var(--teal-dark)', fontWeight: '700' }}>
+                        {c.rendimientoKg?.toLocaleString('es-VE')} kg
+                      </td>
+                      <td style={{ padding: '12px 8px', color: 'var(--gold)', fontWeight: '600' }}>
+                        {typeof kgHa === 'number' ? kgHa.toLocaleString('es-VE') : kgHa} kg/ha
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

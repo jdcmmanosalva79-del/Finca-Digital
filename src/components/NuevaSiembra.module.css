@@ -1,0 +1,207 @@
+/* NuevaSiembra.module.css */
+
+.wrapper {
+  padding: 24px;
+  max-width: 780px;
+}
+
+.card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.iconWrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--teal-pale);
+  color: var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 2px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+/* ── Form ── */
+.form {
+  padding: 24px 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 560px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-700);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.labelDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--teal-light);
+  flex-shrink: 0;
+}
+
+.input,
+.select {
+  padding: 10px 14px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--gray-800);
+  background: var(--gray-100);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--teal-light);
+  box-shadow: 0 0 0 3px rgba(42, 125, 111, 0.12);
+  background: var(--white);
+}
+
+/* ── Preview de fechas ── */
+.preview {
+  background: var(--teal-pale);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  border-left: 3px solid var(--teal-light);
+}
+
+.previewTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--teal-dark);
+  margin-bottom: 8px;
+}
+
+.previewList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.previewList li {
+  font-size: 13px;
+  color: var(--gray-700);
+}
+
+/* ── Botón ── */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+  color: var(--white);
+  padding: 13px 28px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  align-self: flex-start;
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Spinner ── */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Feedback ── */
+.feedback {
+  margin: 0 28px 24px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.exito {
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+.tareasList {
+  list-style: none;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

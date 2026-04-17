@@ -1,0 +1,40 @@
+# ──────────────────────────────────────────────
+# [build]
+# ──────────────────────────────────────────────
+[build]
+  command   = "npm run build"
+  publish   = "dist"
+  functions = "netlify/functions"
+
+# ──────────────────────────────────────────────
+# [dev] — configuración de `netlify dev`
+# Levanta Vite en 5173 y lo sirve desde 8888
+# junto con las Netlify Functions
+# ──────────────────────────────────────────────
+[dev]
+  command     = "vite"
+  targetPort  = 5173
+  port        = 8888
+  autoLaunch  = false
+
+# ──────────────────────────────────────────────
+# [functions]
+# Usa esbuild para empaquetar las funciones
+# (resuelve el conflicto CJS/ESM automáticamente)
+# ──────────────────────────────────────────────
+[functions]
+  node_bundler = "esbuild"
+
+# ──────────────────────────────────────────────
+# Proxy: /api/* → función serverless "api"
+# ──────────────────────────────────────────────
+[[redirects]]
+  from   = "/api/*"
+  to     = "/.netlify/functions/api/:splat"
+  status = 200
+
+# SPA fallback — React Router / navegación directa
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200

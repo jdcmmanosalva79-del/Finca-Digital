@@ -1,0 +1,492 @@
+/* CropsManagement.module.css */
+
+.wrapper {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* ── Header ── */
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pageTitle {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--gray-900);
+}
+
+.pageSubtitle {
+  font-size: 13px;
+  color: var(--gray-500);
+  margin-top: 4px;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--gray-200);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  width: fit-content;
+}
+
+.tab {
+  padding: 8px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-600);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: background 0.18s, color 0.18s;
+}
+
+.tab:hover {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--gray-800);
+}
+
+.tabActive {
+  background: var(--white);
+  color: var(--teal-dark);
+  box-shadow: var(--shadow-sm);
+}
+
+.tabBadge {
+  background: var(--teal-pale);
+  color: var(--teal-dark);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 20px;
+}
+
+/* ══════════ CATÁLOGO ══════════ */
+.catalogGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.catalogCard {
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.catalogCard:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.catalogTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.catalogEmoji {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.catalogName {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.catalogCiclo {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-top: 2px;
+}
+
+.aguaBadge {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.alertaBox {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.alertaLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray-700);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.alertaText {
+  font-size: 12px;
+  color: var(--gray-700);
+  line-height: 1.5;
+}
+
+.tareasTimeline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timelineItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--gray-700);
+}
+
+.timelineDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ══════════ SIEMBRAS ACTIVAS ══════════ */
+.activasWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.siembrasGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.siembraCard {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: box-shadow 0.2s;
+}
+
+.siembraCard:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.siembraHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.siembraInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.siembraEmoji {
+  font-size: 28px;
+}
+
+.siembraRubro {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.siembraLote {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-top: 2px;
+}
+
+.estadoBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.estadoActivo {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.deleteBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s, transform 0.2s;
+  opacity: 0.7;
+}
+
+.deleteBtn:hover {
+  background: #fee2e2;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Progreso */
+.progressSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+.progressBar {
+  height: 8px;
+  background: var(--gray-200);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.6s ease;
+}
+
+/* Fechas */
+.fechasRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+
+.fechaItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.fechaLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.fechaVal {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-top: 2px;
+}
+
+.fechaDivider {
+  width: 1px;
+  height: 32px;
+  background: var(--gray-300);
+}
+
+/* Tareas */
+.tareasSummary {
+  display: flex;
+}
+
+.tareasPendBadge {
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--teal-pale);
+  color: var(--teal-dark);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.tareasList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.tareaItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--gray-100);
+  transition: background 0.15s;
+}
+
+.tareaCompletada {
+  opacity: 0.5;
+}
+
+.tareaCheckbox {
+  margin-top: 4px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--teal);
+}
+
+.tareaDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.tareaNombre {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-800);
+  line-height: 1.4;
+}
+
+.tareaDateEdit {
+  font-size: 11px;
+  color: var(--gray-500);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dateInput {
+  font-size: 11px;
+  color: var(--gray-600);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-family: inherit;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.dateInput:hover:not(:disabled) {
+  border-color: var(--gray-300);
+  background: var(--white);
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: var(--teal);
+  background: var(--white);
+}
+
+.dateInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Empty ── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 60px 20px;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.emptyIcon {
+  font-size: 48px;
+}
+
+.emptyState p {
+  font-size: 15px;
+  color: var(--gray-500);
+}
+
+.emptyBtn {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.emptyBtn:hover {
+  opacity: 0.88;
+}
+
+/* ── Loading ── */
+.loadingCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 20px;
+  color: var(--gray-500);
+  font-size: 14px;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+}
+
+/* ── Spinner ── */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid var(--gray-300);
+  border-top-color: var(--teal);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

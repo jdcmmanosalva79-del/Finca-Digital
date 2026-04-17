@@ -9,6 +9,9 @@ import PlaceholderPage from './components/PlaceholderPage';
 import CropsManagement from './components/CropsManagement';
 import HarvestLog from './components/HarvestLog';
 import Login from './components/Login';
+import NuevaSiembra from './components/NuevaSiembra';
+import DashboardAlertas from './components/DashboardAlertas';
+import ConfiguracionWhatsApp from './components/ConfiguracionWhatsApp';
 import './index.css';
 import styles from './App.module.css';
 
@@ -17,10 +20,13 @@ function AppContent() {
 
   const renderPage = () => {
     switch(activePage) {
-      case 'dashboard': return <Dashboard />;
-      case 'cultivos': return <CropsManagement />;
-      case 'reportes': return <HarvestLog />;
-      default: return <PlaceholderPage page={activePage} />;
+      case 'dashboard':    return <Dashboard />;
+      case 'alertas':     return <DashboardAlertas />;
+      case 'nuevaSiembra':return <NuevaSiembra />;
+      case 'cultivos':    return <CropsManagement />;
+      case 'reportes':    return <HarvestLog />;
+      case 'config':      return <ConfiguracionWhatsApp />;
+      default:            return <PlaceholderPage page={activePage} />;
     }
   };
 

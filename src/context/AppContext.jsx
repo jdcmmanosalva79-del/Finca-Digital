@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, updateDoc, collection, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const AppContext = createContext();
@@ -35,7 +35,17 @@ export function AppProvider({ children }) {
 
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
-        setData(prev => ({ ...prev, ...docSnap.data() }));
+        const firestoreData = docSnap.data();
+        setData(prev => ({ 
+          ...prev, 
+          ...firestoreData,
+          // Preservar los datos reales calculados de la otra suscripción
+          cultivos: prev.cultivos,
+          stats: {
+            ...firestoreData.stats,
+            'cultivos-activos': prev.stats['cultivos-activos']
+          }
+        }));
       } else {
         setDoc(docRef, INITIAL_DATA);
       }
@@ -45,7 +55,53 @@ export function AppProvider({ children }) {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    // ── Suscribirse a los cultivos reales para el Dashboard ──
+    const qCrops = query(collection(db, 'crops'), where('estado', '==', 'activo'));
+    const unsubCrops = onSnapshot(qCrops, (snap) => {
+      const activeCropsCount = snap.size;
+      
+      // Base para sumarizar
+      const cultivosReales = {
+        maiz: { campos: 0, hectareasNum: 0, count: 0, data: [2, 3, 2.5, 4, 3.5, 5, 4.5, 6] },
+        cacao: { campos: 0, hectareasNum: 0, count: 0, data: [1, 1, 2, 3, 3, 3, 4, 4] },
+        yuca: { campos: 0, hectareasNum: 0, count: 0, data: [1, 2, 1, 3, 1, 2, 1, 1] },
+        platano: { campos: 0, hectareasNum: 0, count: 0, data: [0, 0, 0, 1, 0, 0, 1, 1] },
+      };
+
+      snap.forEach(d => {
+        const crop = d.data();
+        // Normalizar clave (Maíz -> maiz, Plátano -> platano)
+        const key = crop.rubro.toLowerCase()
+          .replace('á', 'a').replace('í', 'i').replace('ó', 'o').replace('ú', 'u');
+        
+        if (cultivosReales[key]) {
+          cultivosReales[key].campos += 1;
+          cultivosReales[key].count += 1;
+          cultivosReales[key].hectareasNum += Number(crop.hectareas) || 0;
+        }
+      });
+
+      // Formatear texto de hectáreas
+      Object.keys(cultivosReales).forEach(k => {
+        if (cultivosReales[k].campos > 0) {
+          cultivosReales[k].hectareas = `${cultivosReales[k].hectareasNum.toFixed(1)} ha totales`;
+        } else {
+          cultivosReales[k].hectareas = 'Sin siembra';
+        }
+        delete cultivosReales[k].hectareasNum;
+      });
+
+      setData(prev => ({
+        ...prev,
+        stats: {
+          ...prev.stats,
+          'cultivos-activos': { count: activeCropsCount }
+        },
+        cultivos: cultivosReales
+      }));
+    });
+
+    return () => { unsubscribe(); unsubCrops(); };
   }, []);
 
   const addFertilizationLog = async (log) => {
