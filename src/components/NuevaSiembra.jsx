@@ -6,7 +6,40 @@
 import { useState } from 'react';
 import styles from './NuevaSiembra.module.css';
 
-const RUBROS_DISPONIBLES = ['Maíz'];
+const RUBROS_DISPONIBLES = ['Maíz', 'Cacao', 'Yuca', 'Plátano'];
+
+const CICLOS_PREVIEW = {
+  Maíz: {
+    duracion: 120,
+    tareas: [
+      { nombre: "Reabonado N/P (1ra aplicación)", dia: 25 },
+      { nombre: "Reabonado N/P (2da aplicación)", dia: 45 },
+    ]
+  },
+  Cacao: {
+    duracion: 180,
+    tareas: [
+      { nombre: "Poda de mantenimiento", dia: 30 },
+      { nombre: "Fertilización foliar", dia: 60 },
+      { nombre: "Control de malezas", dia: 90 },
+    ]
+  },
+  Yuca: {
+    duracion: 270,
+    tareas: [
+      { nombre: "Desmalezado temprano", dia: 30 },
+      { nombre: "Aporque y fertilización", dia: 60 },
+    ]
+  },
+  Plátano: {
+    duracion: 300,
+    tareas: [
+      { nombre: "Deshoje y deshije", dia: 45 },
+      { nombre: "Fertilización potásica", dia: 90 },
+      { nombre: "Embolsado de racimo", dia: 210 },
+    ]
+  }
+};
 const API_URL = import.meta.env.VITE_API_URL ?? '';
 
 
@@ -156,19 +189,18 @@ export default function NuevaSiembra({ onSiembraCreada }) {
             </div>
           </div>
 
-          {/* Preview de tareas (solo para Maíz) */}
+          {/* Preview de tareas */}
           {form.fechaSiembra && (
             <div className={styles.preview}>
-              <p className={styles.previewTitle}>📅 Tareas que se programarán:</p>
+              <p className={styles.previewTitle}>📅 Tareas que se programarán ({form.rubro}):</p>
               <ul className={styles.previewList}>
-                <li>Día 25 — Reabonado N/P (1ra aplicación):&nbsp;
-                  <strong>{addDaysStr(form.fechaSiembra, 25)}</strong>
-                </li>
-                <li>Día 45 — Reabonado N/P (2da aplicación):&nbsp;
-                  <strong>{addDaysStr(form.fechaSiembra, 45)}</strong>
-                </li>
-                <li>Día 120 — Finalización del ciclo:&nbsp;
-                  <strong>{addDaysStr(form.fechaSiembra, 120)}</strong>
+                {CICLOS_PREVIEW[form.rubro].tareas.map((t, i) => (
+                  <li key={i}>Día {t.dia} — {t.nombre}:&nbsp;
+                    <strong>{addDaysStr(form.fechaSiembra, t.dia)}</strong>
+                  </li>
+                ))}
+                <li>Día {CICLOS_PREVIEW[form.rubro].duracion} — Finalización del ciclo:&nbsp;
+                  <strong>{addDaysStr(form.fechaSiembra, CICLOS_PREVIEW[form.rubro].duracion)}</strong>
                 </li>
               </ul>
             </div>

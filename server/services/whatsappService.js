@@ -13,7 +13,7 @@ const PROVIDER = process.env.WHATSAPP_PROVIDER || "ultramsg"; // "ultramsg" | "t
 // ─────────────────────────────────────────────
 async function enviarConUltraMsg(telefono, mensaje) {
   const instanceId = process.env.ULTRAMSG_INSTANCE_ID;
-  const token      = process.env.ULTRAMSG_TOKEN;
+  const token = process.env.ULTRAMSG_TOKEN;
 
   if (!instanceId || !token) {
     throw new Error("Faltan credenciales de UltraMsg (ULTRAMSG_INSTANCE_ID, ULTRAMSG_TOKEN).");
@@ -35,9 +35,9 @@ async function enviarConUltraMsg(telefono, mensaje) {
 // Twilio
 // ─────────────────────────────────────────────
 async function enviarConTwilio(telefono, mensaje) {
-  const accountSid  = process.env.TWILIO_ACCOUNT_SID;
-  const authToken   = process.env.TWILIO_AUTH_TOKEN;
-  const fromNumber  = process.env.TWILIO_WHATSAPP_FROM; // ej. "whatsapp:+14155238886"
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const fromNumber = process.env.TWILIO_WHATSAPP_FROM; // ej. "whatsapp:+14155238886"
 
   if (!accountSid || !authToken || !fromNumber) {
     throw new Error("Faltan credenciales de Twilio (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM).");

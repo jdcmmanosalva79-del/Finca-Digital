@@ -13,20 +13,33 @@ const { collection, addDoc, query, where, getDocs, doc, getDoc, updateDoc, Times
 // ─────────────────────────────────────────────
 const CICLOS = {
   Maíz: {
-    duracion: 120, // días totales del ciclo
+    duracion: 120,
     tareas: [
-      {
-        nombre: "Reabonado (Nitrógeno/Fósforo) - 1ra aplicación",
-        diaRelativo: 25,
-        tipo: "fertilizacion",
-        completada: false,
-      },
-      {
-        nombre: "Reabonado (Nitrógeno/Fósforo) - 2da aplicación",
-        diaRelativo: 45,
-        tipo: "fertilizacion",
-        completada: false,
-      },
+      { nombre: "Reabonado (Nitrógeno/Fósforo) - 1ra aplicación", diaRelativo: 25, tipo: "fertilizacion", completada: false },
+      { nombre: "Reabonado (Nitrógeno/Fósforo) - 2da aplicación", diaRelativo: 45, tipo: "fertilizacion", completada: false },
+    ],
+  },
+  Cacao: {
+    duracion: 180,
+    tareas: [
+      { nombre: "Poda de mantenimiento", diaRelativo: 30, tipo: "mantenimiento", completada: false },
+      { nombre: "Fertilización foliar", diaRelativo: 60, tipo: "fertilizacion", completada: false },
+      { nombre: "Control de malezas", diaRelativo: 90, tipo: "mantenimiento", completada: false },
+    ],
+  },
+  Yuca: {
+    duracion: 270,
+    tareas: [
+      { nombre: "Desmalezado temprano", diaRelativo: 30, tipo: "mantenimiento", completada: false },
+      { nombre: "Aporque y fertilización", diaRelativo: 60, tipo: "fertilizacion", completada: false },
+    ],
+  },
+  Plátano: {
+    duracion: 300,
+    tareas: [
+      { nombre: "Deshoje y deshije", diaRelativo: 45, tipo: "mantenimiento", completada: false },
+      { nombre: "Fertilización potásica", diaRelativo: 90, tipo: "fertilizacion", completada: false },
+      { nombre: "Embolsado de racimo", diaRelativo: 210, tipo: "mantenimiento", completada: false },
     ],
   },
 };
@@ -142,7 +155,7 @@ async function obtenerTareasDeHoy(req, res) {
   try {
     const hoy = new Date();
     const inicioDia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 0, 0, 0);
-    const finDia    = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59);
+    const finDia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59);
 
     const q = query(collection(db, "crops"), where("estado", "==", "activo"));
     const snapshot = await getDocs(q);
