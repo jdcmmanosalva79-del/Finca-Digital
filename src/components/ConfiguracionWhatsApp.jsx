@@ -1,6 +1,6 @@
 /**
  * ConfiguracionWhatsApp.jsx
- * Permite al usuario guardar su número de teléfono en Firestore
+ * Permite al usuario vincular su sesión de WhatsApp (vía QR)
  * y activar/desactivar el envío de alertas por WhatsApp.
  */
 
@@ -8,18 +8,23 @@ import { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import styles from './ConfiguracionWhatsApp.module.css';
+import QRCode from 'react-qr-code';
 
 export default function ConfiguracionWhatsApp() {
-  const [telefono, setTelefono]         = useState('');
-  const [activado, setActivado]         = useState(false);
-  const [guardando, setGuardando]       = useState(false);
-  const [cargando, setCargando]         = useState(true);
-  const [toast, setToast]               = useState(null);
+  const [telefono, setTelefono] = useState('');
+  const [activado, setActivado] = useState(false);
+  const [guardando, setGuardando] = useState(false);
+  const [cargando, setCargando] = useState(true);
+  const [toast, setToast] = useState(null);
   const [testEnviando, setTestEnviando] = useState(false);
 
-  const userId = auth.currentUser?.uid;
-  const API_URL = import.meta.env.VITE_API_URL ?? '';
+  // Estado del bot de WhatsApp
+  const [waStatus, setWaStatus] = useState('NOT_INITIALIZED');
+  const [waQr, setWaQr] = useState(null);
+  const [waLoading, setWaLoading] = useState(false);
 
+  const userId = auth.currentUser?.uid;
+  const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:4000';
 
   // ── Cargar configuración actual del usuario ──
   useEffect(() => {
@@ -32,6 +37,7 @@ export default function ConfiguracionWhatsApp() {
           setTelefono(data.telefono || '');
           setActivado(data.notificacionesActivas || false);
         }
+        checkWaStatus();
       } catch (err) {
         console.error('[ConfigWA] Error cargando config:', err);
       } finally {
@@ -40,12 +46,69 @@ export default function ConfiguracionWhatsApp() {
     })();
   }, [userId]);
 
+  // Polling de status
+  useEffect(() => {
+    if (!userId) return;
+    let interval;
+    if (waStatus === 'INITIALIZING' || waStatus === 'QR_READY') {
+      interval = setInterval(() => {
+        checkWaStatus();
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [userId, waStatus]);
+
+  async function checkWaStatus() {
+    try {
+      const res = await fetch(`${API_URL}/api/whatsapp/status/${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setWaStatus(data.status);
+        setWaQr(data.qr);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function startWaSession() {
+    setWaLoading(true);
+    try {
+      await fetch(`${API_URL}/api/whatsapp/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      setWaStatus('INITIALIZING');
+    } catch (e) {
+      mostrarToast('❌ Error al iniciar sesión de WhatsApp', true);
+    } finally {
+      setWaLoading(false);
+    }
+  }
+
+  async function logoutWaSession() {
+    setWaLoading(true);
+    try {
+      await fetch(`${API_URL}/api/whatsapp/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      setWaStatus('NOT_INITIALIZED');
+      setWaQr(null);
+    } catch (e) {
+      mostrarToast('❌ Error al cerrar sesión', true);
+    } finally {
+      setWaLoading(false);
+    }
+  }
+
   // ── Guardar en Firestore ──
   async function handleGuardar(e) {
     e.preventDefault();
     if (!userId) return;
 
-    // Validar formato básico: comienza con + y tiene dígitos
     if (!/^\+\d{7,15}$/.test(telefono.trim())) {
       mostrarToast('❌ Número inválido. Usa formato internacional: +584141234567', true);
       return;
@@ -82,7 +145,7 @@ export default function ConfiguracionWhatsApp() {
       const res = await fetch(`${API_URL}/api/notificaciones/test`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telefono: telefono.trim() }),
+        body: JSON.stringify({ telefono: telefono.trim(), userId }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error desconocido');
@@ -125,10 +188,9 @@ export default function ConfiguracionWhatsApp() {
         {/* Header */}
         <div className={styles.cardHeader}>
           <div className={styles.iconWrap}>
-            {/* WhatsApp SVG */}
             <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 1.99.522 3.86 1.436 5.476L2.001 22l4.617-1.41A9.954 9.954 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.963 7.963 0 0 1-4.076-1.116l-.292-.174-3.021.922.894-2.96-.192-.304A8 8 0 1 1 12 20z"/>
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 1.99.522 3.86 1.436 5.476L2.001 22l4.617-1.41A9.954 9.954 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.963 7.963 0 0 1-4.076-1.116l-.292-.174-3.021.922.894-2.96-.192-.304A8 8 0 1 1 12 20z" />
             </svg>
           </div>
           <div>
@@ -139,6 +201,55 @@ export default function ConfiguracionWhatsApp() {
           </div>
         </div>
 
+        {/* Sección de Bot de WhatsApp (QR) */}
+        <div className={styles.serverStatusContainer}>
+          <h3 className={styles.serverStatusTitle}>Vincular WhatsApp Emisor</h3>
+          
+          {waStatus === 'READY' ? (
+            <div className={styles.botConnected}>
+              ✅ Tu WhatsApp está vinculado y listo para emitir notificaciones.
+              <br/>
+              <button 
+                type="button" 
+                className={styles.btnSecondary} 
+                style={{marginTop: '10px', fontSize: '12px', padding: '6px 12px'}}
+                onClick={logoutWaSession}
+                disabled={waLoading}
+              >
+                Desvincular
+              </button>
+            </div>
+          ) : waStatus === 'QR_READY' && waQr ? (
+            <div className={styles.qrContainer}>
+              <p className={styles.qrInstructions}>
+                Abre WhatsApp en tu teléfono, ve a <strong>Dispositivos vinculados</strong>, toca <strong>Vincular un dispositivo</strong> y escanea este código.
+              </p>
+              <div className={styles.qrCodeWrapper}>
+                <QRCode value={waQr} size={180} />
+              </div>
+            </div>
+          ) : waStatus === 'INITIALIZING' ? (
+            <div className={styles.qrLoading}>
+              <span className={styles.spinner} />
+              <span>Generando código QR seguro para tu cuenta...</span>
+            </div>
+          ) : (
+            <div className={styles.qrContainer}>
+              <p className={styles.qrInstructions}>
+                Para poder recibir alertas gratis, primero debes vincular una sesión de WhatsApp que actuará como emisor de los mensajes para tu finca.
+              </p>
+              <button 
+                type="button" 
+                className={styles.btnPrimary} 
+                onClick={startWaSession}
+                disabled={waLoading}
+              >
+                {waLoading ? <span className={styles.spinner} /> : 'Generar Código QR'}
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Formulario */}
         <form onSubmit={handleGuardar} className={styles.form}>
 
@@ -146,7 +257,7 @@ export default function ConfiguracionWhatsApp() {
           <div className={styles.field}>
             <label htmlFor="wa-telefono" className={styles.label}>
               <span className={styles.labelDot} />
-              Número de WhatsApp (formato internacional)
+              Número Receptor (formato internacional)
             </label>
             <div className={styles.inputGroup}>
               <span className={styles.prefix}>📱</span>
@@ -159,7 +270,7 @@ export default function ConfiguracionWhatsApp() {
                 className={styles.input}
               />
             </div>
-            <span className={styles.hint}>Incluye el código de país. Ej: +58 para Venezuela.</span>
+            <span className={styles.hint}>Este número recibirá las alertas. Puede ser tu mismo número. Ej: +58...</span>
           </div>
 
           {/* Toggle Activar/Desactivar */}
@@ -206,7 +317,8 @@ export default function ConfiguracionWhatsApp() {
               id="wa-test-btn"
               className={styles.btnSecondary}
               onClick={handleTest}
-              disabled={testEnviando}
+              disabled={testEnviando || waStatus !== 'READY'}
+              title={waStatus !== 'READY' ? 'Primero debes vincular WhatsApp arriba' : ''}
             >
               {testEnviando ? <span className={styles.spinner} /> : '📲 Enviar Mensaje de Prueba'}
             </button>
@@ -217,8 +329,7 @@ export default function ConfiguracionWhatsApp() {
         <div className={styles.infoFooter}>
           <span className={styles.infoIcon}>ℹ️</span>
           <p>
-            Los mensajes se envían vía <strong>UltraMsg</strong> o <strong>Twilio</strong> según la configuración del servidor.
-            Asegúrate de que el servidor backend esté activo.
+            Los mensajes se envían de forma gratuita utilizando tu propia sesión de WhatsApp Web, de forma individual y privada para tu cuenta.
           </p>
         </div>
       </div>

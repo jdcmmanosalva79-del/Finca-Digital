@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import styles from './Login.module.css';
 
 export default function Login() {
@@ -18,7 +19,12 @@ export default function Login() {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, 'users', userCred.user.uid), {
+          email: userCred.user.email,
+          role: userCred.user.email === 'admin@fincadigital.com' ? 'admin' : 'encargado',
+          createdAt: new Date().toISOString()
+        });
       }
     } catch (err) {
       if (err.code === 'auth/invalid-credential') setError('Credenciales incorrectas o usuario no encontrado.');
@@ -41,11 +47,11 @@ export default function Login() {
           <div className={styles.logo}>
             <svg viewBox="0 0 48 48" fill="none">
               <circle cx="24" cy="24" r="24" fill="#e8f5f2" />
-              <path d="M24 38C24 38 12 30 12 20C12 14.477 17.373 10 24 10C30.627 10 36 14.477 36 20C36 30 24 38 24 38Z" fill="#2a7d6f" opacity="0.3"/>
-              <path d="M24 34C24 34 14 27 14 19C14 14.582 18.477 11 24 11C29.523 11 34 14.582 34 19C34 27 24 34 24 34Z" fill="#2a7d6f" opacity="0.6"/>
-              <path d="M24 10 L24 30" stroke="#c8860a" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M24 22 C24 22 19 18 17 14" stroke="#c8860a" strokeWidth="1.5" strokeLinecap="round"/>
-              <path d="M24 18 C24 18 28 15 30 12" stroke="#c8860a" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M24 38C24 38 12 30 12 20C12 14.477 17.373 10 24 10C30.627 10 36 14.477 36 20C36 30 24 38 24 38Z" fill="#2a7d6f" opacity="0.3" />
+              <path d="M24 34C24 34 14 27 14 19C14 14.582 18.477 11 24 11C29.523 11 34 14.582 34 19C34 27 24 34 24 34Z" fill="#2a7d6f" opacity="0.6" />
+              <path d="M24 10 L24 30" stroke="#c8860a" strokeWidth="2" strokeLinecap="round" />
+              <path d="M24 22 C24 22 19 18 17 14" stroke="#c8860a" strokeWidth="1.5" strokeLinecap="round" />
+              <path d="M24 18 C24 18 28 15 30 12" stroke="#c8860a" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </div>
           <h1 className={styles.title}>Finca Digital</h1>
@@ -56,16 +62,16 @@ export default function Login() {
           <h2 className={styles.formTitle}>
             {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
           </h2>
-          
+
           {error && <div className={styles.errorMessage}>{error}</div>}
 
           <div className={styles.inputGroup}>
             <label className={styles.label}>Correo Electrónico</label>
             <div className={styles.inputWrapper}>
               <span className={styles.inputIcon}>✉️</span>
-              <input 
-                type="email" 
-                className={styles.input} 
+              <input
+                type="email"
+                className={styles.input}
                 placeholder="admin@fincadigital.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -78,9 +84,9 @@ export default function Login() {
             <label className={styles.label}>Contraseña</label>
             <div className={styles.inputWrapper}>
               <span className={styles.inputIcon}>🔒</span>
-              <input 
-                type="password" 
-                className={styles.input} 
+              <input
+                type="password"
+                className={styles.input}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -98,9 +104,9 @@ export default function Login() {
           <span className={styles.footerText}>
             {isLogin ? '¿No tienes cuenta en la finca?' : '¿Ya eres parte de Finca Digital?'}
           </span>
-          <button 
-            type="button" 
-            className={styles.switchBtn} 
+          <button
+            type="button"
+            className={styles.switchBtn}
             onClick={() => {
               setIsLogin(!isLogin);
               setError('');

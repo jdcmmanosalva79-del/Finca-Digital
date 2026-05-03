@@ -1,7 +1,7 @@
 .header {
   position: fixed;
   top: 0;
-  left: var(--sidebar-width);
+  left: 0;
   right: 0;
   height: var(--header-height);
   background: var(--white);
@@ -105,5 +105,5 @@
 .btnDark:hover {
   background: var(--gray-900);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }

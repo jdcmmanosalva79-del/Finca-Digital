@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import MiniChart from './MiniChart';
-import FieldMap from './FieldMap';
 import StatCard from './StatCard';
 import WeatherWidget from './WeatherWidget';
 import styles from './Dashboard.module.css';
@@ -27,35 +26,117 @@ const STAT_CONFIG = {
         <circle cx="16" cy="19" r="1.5" fill="#f0a429" />
       </svg>
     ),
-  },
-  'inventario': {
-    id: 'inventario', title: 'Inventario', sub: 'Control de insumos', link: 'Recibir insumos (+5) →', color: '#2a5f8a', bg: '#e4eef8',
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none">
-        <rect x="8" y="18" width="32" height="22" rx="3" fill="#5a9fd4" opacity="0.3" />
-        <rect x="12" y="22" width="24" height="14" rx="2" fill="#2a5f8a" opacity="0.4" />
-        <path d="M24 18 L8 26 L24 34 L40 26 Z" fill="#3a7fc4" opacity="0.5" />
-        <path d="M24 10 L8 18 L24 26 L40 18 Z" fill="#2a5f8a" opacity="0.7" />
-        <line x1="24" y1="26" x2="24" y2="34" stroke="#5a9fd4" strokeWidth="1.5" />
-        <line x1="40" y1="18" x2="40" y2="26" stroke="#5a9fd4" strokeWidth="1.5" />
-      </svg>
-    ),
-  },
-  'reportes': {
-    id: 'reportes', title: 'Reportes', sub: 'Análisis y estadísticas', link: 'Ver detalles →', color: '#6a3d9e', bg: '#f0eafc',
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none">
-        <rect x="10" y="8" width="28" height="34" rx="3" fill="#a080d0" opacity="0.25" />
-        <rect x="14" y="12" width="20" height="3" rx="1.5" fill="#7a50c0" opacity="0.5" />
-        <rect x="14" y="18" width="20" height="3" rx="1.5" fill="#7a50c0" opacity="0.4" />
-        <rect x="14" y="24" width="14" height="3" rx="1.5" fill="#7a50c0" opacity="0.3" />
-        <rect x="28" y="30" width="6" height="8" rx="1" fill="#7a50c0" opacity="0.7" />
-        <rect x="20" y="33" width="6" height="5" rx="1" fill="#9060d0" opacity="0.6" />
-        <rect x="14" y="35" width="4" height="3" rx="1" fill="#a070d8" opacity="0.5" />
-      </svg>
-    ),
-  },
+  }
 };
+
+function CropDistributionChart({ cultivos }) {
+  const data = Object.values(cultivos).filter(c => c.campos > 0);
+
+  if (data.length === 0) {
+    return (
+      <div style={{ background: 'white', borderRadius: 24, padding: 24, boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200, border: '1px solid var(--cream-dark)' }}>
+        <p style={{ color: 'var(--gray-500)', fontSize: 14, fontWeight: 600 }}>No hay siembras activas para graficar</p>
+      </div>
+    );
+  }
+
+  const total = data.reduce((acc, c) => acc + (parseFloat(c.hectareas) || 0), 0);
+  let currentAngle = 0;
+
+  return (
+    <div style={{
+      borderRadius: 24,
+      display: 'flex',
+      flexDirection: 'column',
+      color: '#fff',
+      width: 342,
+      height: 184,
+      position: 'relative',
+      overflow: 'hidden',
+      boxShadow: '0 10px 30px rgba(200, 134, 10, 0.2)'
+    }}>
+      <svg fill="none" viewBox="0 0 342 175" height="175" width="342" xmlns="http://www.w3.org/2000/svg" style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
+        <path fill="url(#paint0_linear_hectares)" d="M0 66.4396C0 31.6455 0 14.2484 11.326 5.24044C22.6519 -3.76754 39.6026 0.147978 73.5041 7.97901L307.903 62.1238C324.259 65.9018 332.436 67.7909 337.218 73.8031C342 79.8154 342 88.2086 342 104.995V131C342 151.742 342 162.113 335.556 168.556C329.113 175 318.742 175 298 175H44C23.2582 175 12.8873 175 6.44365 168.556C0 162.113 0 151.742 0 131V66.4396Z"></path>
+        <defs>
+          <linearGradient gradientUnits="userSpaceOnUse" y2="128" x2="354.142" y1="128" x1="0" id="paint0_linear_hectares">
+            <stop stopColor="#f0a429"></stop>
+            <stop stopColor="#c8860a" offset="1"></stop>
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <div style={{ position: 'absolute', right: -10, top: -10, width: 120, height: 120, zIndex: 2, opacity: 0.8 }}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+        </svg>
+      </div>
+
+      <div style={{ position: 'relative', zIndex: 3, display: 'flex', flexDirection: 'column', height: '100%', padding: '16px 20px', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20, flex: 1, marginTop: 4 }}>
+          <div style={{ position: 'relative', width: 85, height: 85, flexShrink: 0 }}>
+            <svg viewBox="0 0 40 40" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%', filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.2))' }}>
+              <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="5" />
+              {data.map((c, i) => {
+                const val = parseFloat(c.hectareas) || 0;
+                const fraction = val / total;
+                const dashLength = Math.max(fraction * 100 - 1.5, 0);
+                const dasharray = `${dashLength} 100`;
+                const offset = -currentAngle;
+                currentAngle += fraction * 100;
+                return (
+                  <circle
+                    key={c.id}
+                    r="16"
+                    cx="20"
+                    cy="20"
+                    fill="none"
+                    stroke={c.color}
+                    strokeWidth="6"
+                    strokeDasharray={dasharray}
+                    strokeDashoffset={offset}
+                    strokeLinecap="round"
+                    style={{ transition: 'all 1s' }}
+                  />
+                );
+              })}
+            </svg>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontWeight: 800, fontSize: 16, color: '#1a202c', lineHeight: 1 }}>{total.toFixed(0)}</span>
+              <span style={{ fontSize: 9, color: '#4a5568', fontWeight: 600, marginTop: 2 }}>ha</span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, justifyContent: 'center' }}>
+            {data.slice(0, 4).map(c => {
+              const val = parseFloat(c.hectareas) || 0;
+              const percent = ((val / total) * 100).toFixed(0);
+              return (
+                <div key={c.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13, background: 'rgba(255,255,255,0.25)', padding: '6px 12px', borderRadius: '10px', backdropFilter: 'blur(4px)', border: '1px solid rgba(0,0,0,0.05)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: c.color, boxShadow: `0 0 8px ${c.color}` }}></div>
+                    <span style={{ color: '#2d3748', fontWeight: 700 }}>{c.name}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 10, color: '#4a5568', fontWeight: 600 }}>{val.toFixed(1)} ha</span>
+                    <span style={{ fontWeight: 800, color: '#1a202c', fontSize: 14 }}>{percent}%</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div style={{ fontSize: 11, color: '#4a5568', fontWeight: 600 }}>Estadísticas Territoriales</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#1a202c' }}>Distribución de Hectáreas</div>
+          </div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#1a202c' }}>Territorio</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { data, loading, updateCrop, updateInventoryStat } = useAppContext();
@@ -80,60 +161,95 @@ export default function Dashboard() {
   return (
     <div className={styles.dashboard}>
       <div className={styles.topRow}>
-        <div className={styles.userCard}>
-          <div className={styles.userCardHeader}>
-            <span className={styles.sectionIcon}>👤</span>
-            <h2 className={styles.sectionTitle}>Información del Usuario</h2>
-          </div>
-          <div className={styles.userProfile}>
-            <div className={styles.userAvatar}>
-              <svg viewBox="0 0 64 64" fill="none">
-                <circle cx="32" cy="32" r="32" fill="#e8f5f2" />
-                <circle cx="32" cy="24" r="10" fill="#2a7d6f" opacity="0.5" />
-                <path d="M14 56 C14 44 50 44 50 56" fill="#2a7d6f" opacity="0.4" />
-                <circle cx="32" cy="24" r="8" fill="#c8a87a" />
-                <path d="M26 22 C26 17 38 17 38 22" fill="#6b4c2a" />
-                <circle cx="29" cy="25" r="1.5" fill="#4a3020" />
-                <circle cx="35" cy="25" r="1.5" fill="#4a3020" />
-                <path d="M29 30 Q32 33 35 30" stroke="#4a3020" strokeWidth="1" fill="none" strokeLinecap="round" />
-                <rect x="28" y="36" width="8" height="10" rx="2" fill="#1a5f5a" />
-                <path d="M16 56 C16 46 24 42 28 40 L28 46 L36 46 L36 40 C40 42 48 46 48 56 Z" fill="#1a5f5a" opacity="0.7" />
-              </svg>
+        <div className={styles.leftColumn}>
+          <div className={styles.userCard}>
+            <div className={styles.userProfileCompact}>
+              <div className={styles.userAvatarCompact}>
+                <span style={{ fontSize: 28 }}>👨‍🌾</span>
+              </div>
+              <div className={styles.userTitleCompact}>
+                <span className={styles.userRoleBigCompact}>{user.nombre}</span>
+                <span className={styles.userRoleCompact}>{user.rol}</span>
+              </div>
+              <div className={styles.userStatusCompact}>
+                <span className={styles.statusDotCompact} style={{ background: user.estado === 'Activo' ? '#22c55e' : '#f59e0b' }}></span>
+                {user.estado}
+              </div>
             </div>
-            <div className={styles.userTitle}>
-              <span className={styles.userRole}>Administrador</span>
-              <span className={styles.userRoleBig}>Principal</span>
-            </div>
-          </div>
-          <div className={styles.userDetails}>
-            <div className={styles.userField}>
-              <span className={styles.fieldLabel}>Nombre</span>
-              <span className={styles.fieldValue}>{user.nombre}</span>
-            </div>
-            <div className={styles.userField}>
-              <span className={styles.fieldLabel}>Rol</span>
-              <span className={styles.fieldValue}>{user.rol}</span>
-            </div>
-            <div className={styles.userField}>
-              <span className={styles.fieldLabel}>Email</span>
-              <span className={styles.fieldValue}>{user.email}</span>
-            </div>
-            <div className={styles.userField}>
-              <span className={styles.fieldLabel}>Estado</span>
-              <span className={styles.fieldValueStatus}>
-                {user.estado} <span className={styles.statusDot} style={{ background: user.estado === 'Activo' ? '#22c55e' : '#f59e0b', boxShadow: `0 0 0 2px ${user.estado === 'Activo' ? 'rgba(34, 197, 94, 0.25)' : 'rgba(245, 158, 11, 0.25)'}` }}></span>
-              </span>
-            </div>
-          </div>
-        </div>
 
-        <div className={styles.mapCard}>
-          <FieldMap />
+            <div className={styles.userDetailsCompact}>
+              <div className={styles.userFieldCompact}>
+                <span className={styles.fieldIconCompact}>📧</span>
+                <span className={styles.fieldValueCompact}>{user.email}</span>
+              </div>
+              <div className={styles.userFieldCompact}>
+                <span className={styles.fieldIconCompact}>📍</span>
+                <span className={styles.fieldValueCompact}>Sede Principal, Barinas</span>
+              </div>
+              <div className={styles.userFieldCompact}>
+                <span className={styles.fieldIconCompact}>🕒</span>
+                <span className={styles.fieldValueCompact}>Último acceso: Hoy</span>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.bottomRow}>
+            <div className={styles.sectionHeader}>
+              <span className={styles.sectionIcon}>🌿</span>
+              <h2 className={styles.sectionTitle}>Resumen de Cultivos Activos</h2>
+            </div>
+            {cultivosData.filter(c => c.campos > 0).length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px', background: 'var(--white)', borderRadius: 'var(--radius-lg)', color: 'var(--gray-500)', boxShadow: 'var(--shadow-sm)' }}>
+                <span style={{ fontSize: '32px', display: 'block', marginBottom: '10px' }}>🌱</span>
+                No tienes siembras activas en este momento.<br />
+                Ve a la sección <b>Cultivos</b> para registrar una nueva siembra.
+              </div>
+            ) : (
+              <div className={styles.cultivoGrid}>
+                {cultivosData.filter(c => c.campos > 0).map((c) => (
+                  <div
+                    key={c.id}
+                    className={styles.cultivoCard}
+                    style={{ background: c.bgGradient }}
+                  >
+                    <div className={styles.cultivoHeader}>
+                      <div className={styles.cultivoInfo}>
+                        <div className={styles.cultivoEmoji}>{c.emoji}</div>
+                        <div className={styles.cultivoName}>{c.name}</div>
+                      </div>
+                      <div className={styles.cultivoCount} style={{ color: c.color }}>
+                        {c.count}
+                      </div>
+                    </div>
+                    <div className={styles.cultivoSub}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {c.campos} {c.campos === 1 ? 'campo activo' : 'campos activos'}
+                      </div>
+                      <div>{c.hectareas}</div>
+                    </div>
+                    <div className={styles.cultivoChart}>
+                      <MiniChart
+                        data={c.data || [0]}
+                        color={c.color}
+                        type={c.id === 'platano' ? 'bar' : 'line'}
+                      />
+                    </div>
+                    <div
+                      className={styles.cultivoImageBg}
+                      style={{ background: c.imgBg }}
+                    >
+                      <span className={styles.cultivoBigEmoji}>{c.emoji}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className={styles.statCards}>
           <WeatherWidget />
-          
+
           {statCardsData.map((card) => (
             <StatCard
               key={card.id}
@@ -141,64 +257,12 @@ export default function Dashboard() {
               active={activeCard === card.id}
               onClick={() => {
                 setActiveCard(activeCard === card.id ? null : card.id);
-                if (card.id === 'inventario') updateInventoryStat(5);
               }}
             />
           ))}
-        </div>
-      </div>
 
-      <div className={styles.bottomRow}>
-        <div className={styles.sectionHeader}>
-          <span className={styles.sectionIcon}>🌿</span>
-          <h2 className={styles.sectionTitle}>Resumen de Cultivos Activos</h2>
+          <CropDistributionChart cultivos={data.cultivos} />
         </div>
-        {cultivosData.filter(c => c.campos > 0).length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', background: 'var(--white)', borderRadius: 'var(--radius-lg)', color: 'var(--gray-500)', boxShadow: 'var(--shadow-sm)' }}>
-            <span style={{ fontSize: '32px', display: 'block', marginBottom: '10px' }}>🌱</span>
-            No tienes siembras activas en este momento.<br/>
-            Ve a la sección <b>Cultivos</b> para registrar una nueva siembra.
-          </div>
-        ) : (
-          <div className={styles.cultivoGrid}>
-            {cultivosData.filter(c => c.campos > 0).map((c) => (
-              <div
-                key={c.id}
-                className={styles.cultivoCard}
-                style={{ background: c.bgGradient }}
-              >
-              <div className={styles.cultivoHeader}>
-                <div className={styles.cultivoInfo}>
-                  <div className={styles.cultivoEmoji}>{c.emoji}</div>
-                  <div className={styles.cultivoName}>{c.name}</div>
-                </div>
-                <div className={styles.cultivoCount} style={{ color: c.color }}>
-                  {c.count}
-                </div>
-              </div>
-              <div className={styles.cultivoSub}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  {c.campos} {c.campos === 1 ? 'campo activo' : 'campos activos'}
-                </div>
-                <div>{c.hectareas}</div>
-              </div>
-              <div className={styles.cultivoChart}>
-                <MiniChart
-                  data={c.data || [0]}
-                  color={c.color}
-                  type={c.id === 'platano' ? 'bar' : 'line'}
-                />
-              </div>
-              <div
-                className={styles.cultivoImageBg}
-                style={{ background: c.imgBg }}
-              >
-                <span className={styles.cultivoBigEmoji}>{c.emoji}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-        )}
       </div>
     </div>
   );

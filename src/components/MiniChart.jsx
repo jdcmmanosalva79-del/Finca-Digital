@@ -54,11 +54,21 @@ export default function MiniChart({ data = [], color = '#2a7d6f', type = 'line' 
         points={areaPoints}
         fill={`url(#grad-${color.replace('#', '')})`}
       />
+      {/* Drop shadow trick for the line */}
+      <polyline
+        points={points.join(' ')}
+        fill="none"
+        stroke="rgba(0,0,0,0.15)"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        transform="translate(0, 2)"
+      />
       <polyline
         points={points.join(' ')}
         fill="none"
         stroke={color}
-        strokeWidth="1.8"
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

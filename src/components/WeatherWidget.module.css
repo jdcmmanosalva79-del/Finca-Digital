@@ -1,92 +1,117 @@
-.widget {
-  background: var(--white);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--cream-dark);
+.container {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  align-items: center; /* Center the card horizontally */
   width: 100%;
 }
 
-.header {
+.card {
+  width: 342px; /* Exact Uiverse dimension */
+  height: 184px; /* Exact Uiverse dimension */
+  position: relative;
+  padding: 20px;
+  color: #fff;
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
-  align-items: center;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(54, 42, 132, 0.3);
+  background: #362A84; /* Fallback */
 }
 
-.location {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--gray-700);
+.background {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
-.temp {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--gray-900);
+.cloud {
+  position: absolute;
+  right: 0;
+  top: -12px;
+  z-index: 2;
 }
 
-.forecast {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
+.cloud svg {
+  height: 120px;
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.2));
 }
 
-.icon {
-  font-size: 32px;
+.mainText {
+  font-size: 48px;
+  z-index: 3;
+  margin: 0;
+  font-weight: 700;
   line-height: 1;
 }
 
-.details {
+.info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  z-index: 3;
+  width: 100%;
+}
+
+.infoLeft {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
-.condition {
+.infoLeft p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.textGray {
+  color: rgba(235, 235, 245, 0.6);
+}
+
+.infoRight {
+  margin: 0;
+  font-weight: 600;
   font-size: 14px;
-  font-weight: 700;
-  color: var(--gray-800);
-}
-
-.prob {
-  font-size: 12px;
-  color: var(--teal);
-  font-weight: 500;
+  align-self: flex-end;
 }
 
 .alertBox {
-  padding: 10px;
-  border-radius: var(--radius-sm);
+  width: 342px; /* Match the card width */
+  padding: 12px 16px;
+  border-radius: 16px;
   font-size: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.05);
 }
 
 .alertIcon {
   font-weight: 700;
-  font-size: 11px;
+  display: block;
+  margin-bottom: 2px;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
 }
 
 .alertText {
   margin: 0;
-  line-height: 1.4;
-  font-weight: 500;
+  opacity: 0.85;
 }
 
 .spinner {
-  width: 24px;
-  height: 24px;
-  border: 3px solid var(--cream-dark);
-  border-top-color: var(--teal);
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(0,0,0,0.05);
+  border-top-color: #362A84;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: 20px auto;
+  margin: 40px auto;
 }
 
 @keyframes spin {

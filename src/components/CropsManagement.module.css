@@ -1,12 +1,18 @@
 /* CropsManagement.module.css */
 
 .wrapper {
-  padding: 24px;
+  padding: 32px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
   height: 100%;
   overflow-y: auto;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Header ── */
@@ -19,9 +25,10 @@
 }
 
 .pageTitle {
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 800;
-  color: var(--gray-900);
+  color: var(--teal-dark);
+  letter-spacing: -0.02em;
 }
 
 .pageSubtitle {
@@ -33,17 +40,18 @@
 /* ── Tabs ── */
 .tabs {
   display: flex;
-  gap: 4px;
-  background: var(--gray-200);
-  padding: 4px;
-  border-radius: var(--radius-md);
+  gap: 6px;
+  background: white;
+  padding: 6px;
+  border-radius: 16px;
   width: fit-content;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 
 .tab {
-  padding: 8px 18px;
-  border-radius: 10px;
-  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--gray-600);
   background: transparent;
@@ -51,28 +59,33 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 7px;
-  transition: background 0.18s, color 0.18s;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tab:hover {
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--gray-100);
   color: var(--gray-800);
 }
 
 .tabActive {
-  background: var(--white);
-  color: var(--teal-dark);
-  box-shadow: var(--shadow-sm);
+  background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(42, 125, 111, 0.2);
 }
 
 .tabBadge {
-  background: var(--teal-pale);
-  color: var(--teal-dark);
+  background: rgba(255,255,255,0.2);
+  color: white;
   font-size: 11px;
   font-weight: 700;
-  padding: 1px 7px;
+  padding: 2px 8px;
   border-radius: 20px;
+}
+
+.tab:not(.tabActive) .tabBadge {
+  background: var(--teal-pale);
+  color: var(--teal-dark);
 }
 
 /* ══════════ CATÁLOGO ══════════ */
@@ -83,13 +96,14 @@
 }
 
 .catalogCard {
-  border-radius: var(--radius-lg);
-  padding: 20px;
+  border-radius: 24px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s, transform 0.2s;
+  gap: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255,255,255,0.5);
 }
 
 .catalogCard:hover {
@@ -184,14 +198,15 @@
 }
 
 .siembraCard {
-  background: var(--white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  padding: 20px;
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  transition: box-shadow 0.2s;
+  gap: 16px;
+  transition: all 0.3s ease;
+  border: 1px solid var(--gray-100);
 }
 
 .siembraCard:hover {

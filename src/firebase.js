@@ -3,7 +3,7 @@ import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyCEaEX4e7DIaK_qRUp2ovzl8nkeWOVfWgQ",
   authDomain: "finca-digital-51f2f.firebaseapp.com",
   databaseURL: "https://finca-digital-51f2f-default-rtdb.firebaseio.com",

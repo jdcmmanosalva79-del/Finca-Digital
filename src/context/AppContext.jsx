@@ -23,12 +23,28 @@ const INITIAL_DATA = {
     platano: { campos: 0, hectareas: 'Sin siembra', count: 1, data: [0, 0, 0, 1, 0, 0, 1, 1] },
   },
   fertilizations: [],
-  weather: null // Will hold weather data
+  weather: null, // Will hold weather data
+  activeCrops: [] // To store all active crops with coordinates
 };
 
-export function AppProvider({ children }) {
+export function AppProvider({ children, currentUser }) {
   const [data, setData] = useState(INITIAL_DATA);
   const [loading, setLoading] = useState(true);
+
+  // Sync real user info into data
+  useEffect(() => {
+    if (currentUser) {
+      setData(prev => ({
+        ...prev,
+        user: {
+          nombre: currentUser.displayName || prev.user.nombre,
+          rol: currentUser.role === 'admin' ? 'Administrador' : currentUser.role === 'encargado' ? 'Encargado' : 'Empleado',
+          email: currentUser.email,
+          estado: 'Activo'
+        }
+      }));
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     const docRef = doc(db, 'dashboard', 'mainData');
@@ -68,8 +84,12 @@ export function AppProvider({ children }) {
         platano: { campos: 0, hectareasNum: 0, count: 0, data: [0, 0, 0, 1, 0, 0, 1, 1] },
       };
 
+      const allActiveCrops = [];
+
       snap.forEach(d => {
         const crop = d.data();
+        allActiveCrops.push({ id: d.id, ...crop });
+        
         // Normalizar clave (Maíz -> maiz, Plátano -> platano)
         const key = crop.rubro.toLowerCase()
           .replace('á', 'a').replace('í', 'i').replace('ó', 'o').replace('ú', 'u');
@@ -97,7 +117,8 @@ export function AppProvider({ children }) {
           ...prev.stats,
           'cultivos-activos': { count: activeCropsCount }
         },
-        cultivos: cultivosReales
+        cultivos: cultivosReales,
+        activeCrops: allActiveCrops
       }));
     });
 
