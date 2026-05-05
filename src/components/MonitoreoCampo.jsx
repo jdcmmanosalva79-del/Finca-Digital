@@ -24,6 +24,13 @@ export default function MonitoreoCampo() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [historial, setHistorial] = useState([]);
+  const [tareasPendientes, setTareasPendientes] = useState([]);
+  const [inventario, setInventario] = useState([]);
+  
+  const [tareaId, setTareaId] = useState('');
+  const [usaInsumos, setUsaInsumos] = useState(false);
+  const [insumoId, setInsumoId] = useState('');
+  const [cantidadInsumo, setCantidadInsumo] = useState('');
 
   // Generamos una lista de lotes activos basados en el contexto
   const activeLotes = [
@@ -34,11 +41,28 @@ export default function MonitoreoCampo() {
 
   useEffect(() => {
     // Escuchar historial de monitoreos
-    const q = query(collection(db, 'monitoreos'), orderBy('timestamp', 'desc'));
-    const unsub = onSnapshot(q, (snap) => {
+    const qMon = query(collection(db, 'monitoreos'), orderBy('timestamp', 'desc'));
+    const unsubMon = onSnapshot(qMon, (snap) => {
       setHistorial(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
-    return () => unsub();
+
+    // Escuchar tareas pendientes
+    const qTar = query(collection(db, 'tareas'), orderBy('timestamp', 'desc'));
+    const unsubTar = onSnapshot(qTar, (snap) => {
+      setTareasPendientes(snap.docs.filter(d => d.data().status === 'pendiente').map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    // Escuchar inventario (para descontar insumos)
+    const qInv = query(collection(db, 'inventario'), orderBy('nombre', 'asc'));
+    const unsubInv = onSnapshot(qInv, (snap) => {
+      setInventario(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    return () => {
+      unsubMon();
+      unsubTar();
+      unsubInv();
+    };
   }, []);
 
   const handleFotoChange = (e) => {
@@ -79,8 +103,30 @@ export default function MonitoreoCampo() {
         fotoUrl: fakePhotoUrl,
         encargado: data.user.nombre,
         encargadoEmail: data.user.email,
+        tareaId: tareaId || null,
+        insumosUsados: usaInsumos ? { id: insumoId, cantidad: Number(cantidadInsumo) } : null,
         timestamp: serverTimestamp()
       });
+
+      // 3. Si hay tarea asociada, marcarla como completada
+      if (tareaId) {
+        await updateDoc(doc(db, 'tareas', tareaId), {
+          status: 'completada',
+          completadaPor: data.user.nombre,
+          fechaCompletada: serverTimestamp()
+        });
+      }
+
+      // 4. Si usó insumos, descontar del inventario
+      if (usaInsumos && insumoId && cantidadInsumo) {
+        const itemInv = inventario.find(i => i.id === insumoId);
+        if (itemInv) {
+          await updateDoc(doc(db, 'inventario', insumoId), {
+            cantidad: itemInv.cantidad - Number(cantidadInsumo),
+            ultimaSalida: serverTimestamp()
+          });
+        }
+      }
 
       setSuccess(true);
       // Reset form
@@ -88,6 +134,10 @@ export default function MonitoreoCampo() {
         setLoteId('');
         setEstado('');
         setObservaciones('');
+        setTareaId('');
+        setUsaInsumos(false);
+        setInsumoId('');
+        setCantidadInsumo('');
         removeFoto();
         setSuccess(false);
       }, 3000);
@@ -147,6 +197,28 @@ export default function MonitoreoCampo() {
       {activeTab === 'registro' && (
         <form className={styles.formCard} onSubmit={handleSubmit}>
           
+          {/* Tarea Asociada */}
+          <div className={styles.formGroup}>
+            <label className={styles.label}>¿Es parte de una Tarea Asignada? (Opcional)</label>
+            <select 
+              className={styles.select}
+              value={tareaId}
+              onChange={(e) => {
+                setTareaId(e.target.value);
+                // Auto-seleccionar el lote si la tarea lo tiene
+                const task = tareasPendientes.find(t => t.id === e.target.value);
+                if (task) setLoteId(task.lote);
+              }}
+            >
+              <option value="">-- No, registro espontáneo --</option>
+              {tareasPendientes.map(tarea => (
+                <option key={tarea.id} value={tarea.id}>
+                  📌 {tarea.tipo} - {tarea.lote} (Asignado por: {tarea.creadoPor})
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Lote Selection */}
           <div className={styles.formGroup}>
             <label className={styles.label}>Selecciona el Lote o Sector</label>
@@ -163,6 +235,49 @@ export default function MonitoreoCampo() {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Insumos Logic */}
+          <div className={styles.formGroup}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              <input 
+                type="checkbox" 
+                id="usaInsumos" 
+                checked={usaInsumos} 
+                onChange={e => setUsaInsumos(e.target.checked)} 
+                style={{ width: '18px', height: '18px' }}
+              />
+              <label htmlFor="usaInsumos" className={styles.label} style={{ margin: 0 }}>¿Utilizaste insumos del inventario?</label>
+            </div>
+
+            {usaInsumos && (
+              <div className={styles.insumosBox}>
+                <div className={styles.formRow}>
+                  <select 
+                    className={styles.select} 
+                    value={insumoId} 
+                    onChange={e => setInsumoId(e.target.value)}
+                    required={usaInsumos}
+                  >
+                    <option value="">-- Selecciona el Insumo --</option>
+                    {inventario.map(item => (
+                      <option key={item.id} value={item.id}>
+                        {item.nombre} ({item.cantidad} {item.unidad} disp.)
+                      </option>
+                    ))}
+                  </select>
+                  <input 
+                    type="number" 
+                    className={styles.input} 
+                    placeholder="Cant." 
+                    value={cantidadInsumo}
+                    onChange={e => setCantidadInsumo(e.target.value)}
+                    required={usaInsumos}
+                    style={{ width: '100px' }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Estado Visual Selection */}

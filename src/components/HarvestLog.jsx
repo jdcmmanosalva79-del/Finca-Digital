@@ -10,6 +10,8 @@ export default function HarvestLog() {
   const { data } = useAppContext();
   const [ciclosFinalizados, setCiclosFinalizados] = useState([]);
   const [ciclosActivos, setCiclosActivos] = useState([]);
+  const [usoInsumos, setUsoInsumos] = useState([]);
+  const [inventario, setInventario] = useState([]);
 
   useEffect(() => {
     // Escuchar finalizados
@@ -24,7 +26,22 @@ export default function HarvestLog() {
       setCiclosActivos(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
-    return () => { unsubFin(); unsubAct(); };
+    // Escuchar monitoreos que usaron insumos
+    const qMon = query(collection(db, 'monitoreos'));
+    const unsubMon = onSnapshot(qMon, (snap) => {
+      setUsoInsumos(snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(d => d.insumosUsados)
+      );
+    });
+
+    // Escuchar inventario (para nombres)
+    const qInv = query(collection(db, 'inventario'));
+    const unsubInv = onSnapshot(qInv, (snap) => {
+      setInventario(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+
+    return () => { unsubFin(); unsubAct(); unsubMon(); unsubInv(); };
   }, []);
 
   const handleExportPDF = () => {
@@ -231,6 +248,49 @@ export default function HarvestLog() {
                           {typeof kgHa === 'number' ? kgHa.toLocaleString('es-VE') : kgHa} kg/ha
                         </span>
                       </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* ── Costos de Insumos Aplicados ── */}
+      <div className={styles.sectionCard}>
+        <h2 className={styles.sectionTitle}>
+          <span style={{ fontSize: '24px' }}>📉</span> Reporte de Costos e Insumos Aplicados
+        </h2>
+        {usoInsumos.length === 0 ? (
+          <p className={styles.emptyText}>No se han registrado consumos de insumos en el monitoreo.</p>
+        ) : (
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Insumo</th>
+                  <th>Cantidad</th>
+                  <th>Lote</th>
+                  <th>Encargado</th>
+                  <th>Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                {usoInsumos.map(u => {
+                  const item = inventario.find(i => i.id === u.insumosUsados?.id);
+                  const fecha = u.timestamp?.toDate?.()?.toLocaleDateString('es-VE') || '—';
+                  return (
+                    <tr key={u.id}>
+                      <td style={{ fontWeight: '600' }}>{item?.nombre || 'Insumo Eliminado'}</td>
+                      <td>
+                        <span className={styles.badgeKg} style={{ background: '#fef2f2', color: '#991b1b', border: '1px solid #fecaca' }}>
+                          -{u.insumosUsados?.cantidad} {item?.unidad}
+                        </span>
+                      </td>
+                      <td>{u.loteId}</td>
+                      <td>{u.encargado}</td>
+                      <td style={{ color: 'var(--gray-500)' }}>{fecha}</td>
                     </tr>
                   );
                 })}

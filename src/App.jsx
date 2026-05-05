@@ -22,31 +22,39 @@ import styles from './App.module.css';
 
 function AppContent({ userRole }) {
   const [activePage, setActivePage] = useState('dashboard');
+  
+  useEffect(() => {
+    const handleNavigate = (e) => setActivePage(e.detail);
+    window.addEventListener('navigate', handleNavigate);
+    return () => window.removeEventListener('navigate', handleNavigate);
+  }, []);
 
   const renderPage = () => {
-    switch(activePage) {
-      case 'dashboard':    return <Dashboard />;
-      case 'alertas':     return <DashboardAlertas />;
-      case 'nuevaSiembra':return <NuevaSiembra />;
-      case 'cultivos':    return <CropsManagement />;
-      case 'monitoreo':   return <MonitoreoCampo />;
-      case 'inventario':  return <Inventario />;
-      case 'reportes':    return <HarvestLog />;
-      case 'config':      return <ConfiguracionWhatsApp />;
-      case 'usuarios':    return userRole === 'admin' ? <UsersManagement /> : <Dashboard />;
-      default:            return <PlaceholderPage page={activePage} />;
+    switch (activePage) {
+      case 'dashboard': return <Dashboard />;
+      case 'alertas': return <DashboardAlertas />;
+      case 'nuevaSiembra': return <NuevaSiembra />;
+      case 'cultivos': return <CropsManagement />;
+      case 'monitoreo': return <MonitoreoCampo />;
+      case 'inventario': return <Inventario />;
+      case 'reportes': return <HarvestLog />;
+      case 'config': return <ConfiguracionWhatsApp />;
+      case 'usuarios': return userRole === 'admin' ? <UsersManagement /> : <Dashboard />;
+      default: return <PlaceholderPage page={activePage} />;
     }
   };
 
   return (
-    <div className={styles.layout}>
-      <Sidebar active={activePage} onNavigate={setActivePage} userRole={userRole} />
-      <div className={styles.main}>
-        <Header onNavigate={setActivePage} userRole={userRole} />
-        <main className={styles.content}>
+    <div className={styles.appLayout}>
+      <Header onNavigate={setActivePage} userRole={userRole} />
+
+      <main className={styles.mainContent}>
+        <div className={styles.pageWrapper}>
           {renderPage()}
-        </main>
-      </div>
+        </div>
+      </main>
+
+      <Sidebar active={activePage} onNavigate={setActivePage} />
     </div>
   );
 }
@@ -71,11 +79,9 @@ function App() {
             role = d.role || 'encargado';
             name = d.name || name;
           } else {
-            // Fallback
             role = currentUser.email === 'admin@fincadigital.com' ? 'admin' : 'encargado';
           }
           setUserRole(role);
-          // Attach full info
           setUser({ ...currentUser, role, displayName: name });
         } catch (error) {
           console.error("Error fetching role:", error);
@@ -93,7 +99,7 @@ function App() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--cream)', color: 'var(--teal)', fontWeight: 'bold' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-gray)', color: 'var(--primary)', fontWeight: 'bold' }}>
         Cargando Finca Digital...
       </div>
     );

@@ -52,8 +52,8 @@ export function AppProvider({ children, currentUser }) {
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         const firestoreData = docSnap.data();
-        setData(prev => ({ 
-          ...prev, 
+        setData(prev => ({
+          ...prev,
           ...firestoreData,
           // Preservar los datos reales calculados de la otra suscripción
           cultivos: prev.cultivos,
@@ -75,7 +75,7 @@ export function AppProvider({ children, currentUser }) {
     const qCrops = query(collection(db, 'crops'), where('estado', '==', 'activo'));
     const unsubCrops = onSnapshot(qCrops, (snap) => {
       const activeCropsCount = snap.size;
-      
+
       // Base para sumarizar
       const cultivosReales = {
         maiz: { campos: 0, hectareasNum: 0, count: 0, data: [2, 3, 2.5, 4, 3.5, 5, 4.5, 6] },
@@ -89,11 +89,11 @@ export function AppProvider({ children, currentUser }) {
       snap.forEach(d => {
         const crop = d.data();
         allActiveCrops.push({ id: d.id, ...crop });
-        
+
         // Normalizar clave (Maíz -> maiz, Plátano -> platano)
         const key = crop.rubro.toLowerCase()
           .replace('á', 'a').replace('í', 'i').replace('ó', 'o').replace('ú', 'u');
-        
+
         if (cultivosReales[key]) {
           cultivosReales[key].campos += 1;
           cultivosReales[key].count += 1;
@@ -127,7 +127,7 @@ export function AppProvider({ children, currentUser }) {
 
   const addFertilizationLog = async (log) => {
     const newLogs = [...(data.fertilizations || []), { ...log, id: Date.now().toString(), date: new Date().toLocaleDateString() }];
-    
+
     setData(prev => ({
       ...prev,
       fertilizations: newLogs

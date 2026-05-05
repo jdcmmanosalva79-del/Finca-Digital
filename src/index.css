@@ -51,6 +51,12 @@ body {
   overflow: hidden;
 }
 
+@media (max-width: 640px) {
+  html, body {
+    font-size: 12px;
+  }
+}
+
 #root {
   height: 100%;
 }
