@@ -1,137 +1,279 @@
+/* ============================
+   WeatherWidget — La Yuca, Barinas
+   ============================ */
+
 .weatherCard {
-  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #3b82f6 100%);
-  border-radius: var(--radius-2xl);
-  padding: 24px;
+  background: linear-gradient(145deg, #0f2057 0%, #1a3a8a 40%, #1565c0 75%, #1e88e5 100%);
+  border-radius: 20px;
+  padding: 22px 24px;
   display: flex;
   flex-direction: column;
+  gap: 14px;
   color: white;
-  box-shadow: 0 10px 25px rgba(30, 58, 138, 0.4);
+  box-shadow:
+    0 12px 40px rgba(14, 30, 100, 0.55),
+    0 2px 8px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
+  min-height: 340px;
 }
 
-.topSection {
+/* Orbes decorativos de fondo */
+.bgOrb1 {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(100, 180, 255, 0.18) 0%, transparent 70%);
+  top: -40px;
+  right: -40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bgOrb2 {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+  bottom: 30px;
+  left: -20px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Header */
+.header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  z-index: 2;
+  align-items: center;
+  z-index: 1;
+  position: relative;
 }
 
-.leftInfo {
-  display: flex;
-  flex-direction: column;
-}
-
-.location {
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 4px;
-  opacity: 0.9;
-}
-
-.tempRow {
+.locationRow {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 6px;
 }
 
-.temp {
-  font-size: 64px;
+.pinIcon {
+  font-size: 14px;
+}
+
+.locationText {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  opacity: 0.95;
+}
+
+.updatedAt {
+  font-size: 11px;
+  opacity: 0.6;
   font-weight: 400;
+}
+
+/* Cuerpo principal */
+.mainBody {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1;
+  position: relative;
+}
+
+.tempSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tempDisplay {
+  display: flex;
+  align-items: flex-start;
   line-height: 1;
-  letter-spacing: -0.02em;
 }
 
-.celsius {
-  font-size: 32px;
-  vertical-align: super;
+.tempValue {
+  font-size: 72px;
   font-weight: 300;
+  letter-spacing: -3px;
+  line-height: 1;
 }
 
-.conditionText {
-  font-size: 18px;
-  font-weight: 500;
-  opacity: 0.9;
-  max-width: 140px;
+.tempUnit {
+  font-size: 28px;
+  font-weight: 400;
+  margin-top: 10px;
+  opacity: 0.85;
+}
+
+.conditionLabel {
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: capitalize;
+  opacity: 0.95;
+  max-width: 160px;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.feelsLike {
+  font-size: 12px;
+  opacity: 0.7;
+  margin: 0;
+  font-weight: 400;
+}
+
+.iconSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weatherIcon {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.4)) brightness(1.05);
+  animation: floatIcon 4s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* Métricas secundarias */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  z-index: 1;
+  position: relative;
+}
+
+.metric {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  backdrop-filter: blur(6px);
+  transition: background 0.2s ease;
+}
+
+.metric:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.metricIcon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.metricValue {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.metricValue small {
+  font-size: 9px;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.metricLabel {
+  font-size: 10px;
+  opacity: 0.7;
+  text-align: center;
   line-height: 1.2;
 }
 
-.rightIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-}
-
-.cloudWrapper {
-  width: 100px;
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cloudImg {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.3));
-}
-
+/* Divisor */
 .divider {
   height: 1px;
-  background-color: rgba(255, 255, 255, 0.2);
-  margin: 16px 0;
-  z-index: 2;
+  background: rgba(255, 255, 255, 0.18);
+  z-index: 1;
   position: relative;
 }
 
-.bottomSection {
-  display: flex;
-  flex-direction: column;
-  z-index: 2;
+/* Pronóstico */
+.forecastSection {
+  z-index: 1;
+  position: relative;
 }
 
-.forecast {
+.forecastTitle {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.65;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 10px;
+}
+
+.forecastList {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 16px;
-  padding: 0 8px;
+  gap: 4px;
 }
 
-.forecastItem {
+.forecastDay {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
+  flex: 1;
+  padding: 6px 2px;
+  border-radius: 10px;
+  transition: background 0.2s;
+  cursor: default;
 }
 
-.fDay {
-  font-size: 12px;
-  font-weight: 500;
-  opacity: 0.8;
+.forecastDay:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.fDayLabel {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.75;
 }
 
 .fIcon {
-  font-size: 18px;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
 }
 
-.footerInfo {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
+.fTemp {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.fPop {
+  font-size: 10px;
+  color: #93c5fd;
   font-weight: 500;
-  opacity: 0.8;
-  padding: 0 8px;
 }
 
-.weatherCard::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.15), transparent);
-  pointer-events: none;
+/* Responsive */
+@media (max-width: 640px) {
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .tempValue {
+    font-size: 56px;
+  }
+  .weatherIcon {
+    width: 80px;
+    height: 80px;
+  }
 }

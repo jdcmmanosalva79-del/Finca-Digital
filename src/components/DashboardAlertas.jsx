@@ -187,7 +187,6 @@ export default function DashboardAlertas() {
 
       <div className={styles.card}>
         <div className={styles.cardHeader}>
-          <span className={styles.cardIcon}>🌱</span>
           <h2 className={styles.cardTitle}>Estado de Cultivos Activos</h2>
           <span className={styles.countBadge}>{cropActivos.length}</span>
         </div>
@@ -200,9 +199,6 @@ export default function DashboardAlertas() {
             {cropActivos.map((crop) => (
               <div key={crop.id} className={`${styles.cropCardPremium} ${getCropBgClass(crop.rubro)}`}>
                 <div className={styles.cropCardHeader}>
-                  <div className={styles.cropIconWrapper}>
-                    <span className={styles.cropEmoji}>{crop.rubro === 'Maíz' ? '🌽' : crop.rubro === 'Cacao' ? '🍫' : crop.rubro === 'Yuca' ? '🥔' : '🌱'}</span>
-                  </div>
                   <div className={styles.cropMainInfo}>
                     <h4 className={styles.cropRubroTitle}>{crop.rubro}</h4>
                     <p className={styles.cropLoteSub}>Lote {crop.lote} · {crop.hectareas} ha</p>
@@ -229,7 +225,7 @@ export default function DashboardAlertas() {
                   </div>
                   {crop._diasTranscurridos >= (crop.duracionDias || 120) && (
                     <button className={styles.finalizarBtnPremium} onClick={() => setModal({ cropId: crop.id, lote: crop.lote, rubro: crop.rubro })}>
-                      🏁 Cosechar
+                      Cosechar
                     </button>
                   )}
                 </div>

@@ -32,15 +32,15 @@
 .logoGroup {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
 }
 
 .logoCircle {
-  width: 60px;
-  height: 60px;
+  width: 72px;
+  height: 72px;
   flex-shrink: 0;
   position: relative;
-  top: -8px; /* Make it pop out slightly if desired, or keep flat */
+  top: 0;
 }
 
 .brandInfo {
@@ -50,10 +50,11 @@
 }
 
 .brandName {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: #3f6212;
   letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .divider {
@@ -89,6 +90,83 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.dropdownContainer {
+  position: relative;
+}
+
+.dropdownBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  background-color: white;
+  color: var(--gray-700);
+  transition: all 0.3s;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dropdownBtn:hover {
+  border-color: var(--teal);
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+.dropdownArrowOpen {
+  transform: rotate(180deg);
+  transition: transform 0.3s;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  padding: 8px;
+  min-width: 200px;
+  z-index: 1001;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.dropdownItem:hover {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--teal);
 }
 
 .outlineBtn {
@@ -186,49 +264,245 @@
   font-weight: 500;
 }
 
+/* ── Responsive Design ── */
+
+/* Tablets (768px - 1100px) */
 @media (max-width: 1100px) {
-  .headerContainer {
-    padding: 0 20px;
+  .header {
+    padding: 14px 24px;
   }
-  .divider, .brandSub {
+
+  .headerContainer {
+    padding: 10px 20px;
+  }
+
+  .divider,
+  .brandSub {
     display: none;
+  }
+
+  .buttonGroup {
+    gap: 8px;
+  }
+
+  .outlineBtn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .logoutBtn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .userDetails {
+    display: none;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .right {
+    gap: 12px;
+  }
+
+  .dropdownBtn {
+    padding: 6px 12px;
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .dropdownBtn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .dropdownMenu {
+    min-width: 180px;
+    padding: 6px;
+  }
+
+  .dropdownItem {
+    padding: 8px 12px;
+    font-size: 12px;
+    gap: 8px;
+  }
+
+  .dropdownItem svg {
+    width: 14px;
+    height: 14px;
   }
 }
 
+/* Móviles grandes (480px - 768px) */
 @media (max-width: 768px) {
+  .header {
+    padding: 12px 16px;
+  }
+
+  .headerContainer {
+    padding: 8px 16px;
+    border-radius: 20px;
+  }
+
   .brandName {
     font-size: 16px;
   }
+
+  .logoCircle {
+    width: 40px;
+    height: 40px;
+  }
+
+  .logoGroup {
+    gap: 10px;
+  }
+
+  .right {
+    gap: 8px;
+  }
+
+  .buttonGroup {
+    gap: 6px;
+  }
+
+  .outlineBtn {
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+
+  .logoutBtn {
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .userProfile {
+    gap: 8px;
+  }
+
+  .userDetails {
+    display: none;
+  }
+
+  .dropdownBtn {
+    padding: 5px 10px;
+    font-size: 10px;
+    gap: 5px;
+  }
+
+  .dropdownBtn svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .dropdownMenu {
+    min-width: 160px;
+    padding: 5px;
+    right: -8px;
+  }
+
+  .dropdownItem {
+    padding: 6px 10px;
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .dropdownItem svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Móviles pequeños (< 480px) */
+@media (max-width: 480px) {
+  .header {
+    padding: 10px 12px;
+  }
+
+  .headerContainer {
+    padding: 8px 12px;
+    border-radius: 16px;
+  }
+
+  .brandName {
+    font-size: 14px;
+  }
+
   .logoCircle {
     width: 36px;
     height: 36px;
   }
-  .right {
-    gap: 12px;
-  }
-  .userDetails {
-    display: none;
-  }
-}
 
-@media (max-width: 480px) {
-  .headerContainer {
-    padding: 0 12px;
+  .logoGroup {
+    gap: 8px;
   }
+
+  .right {
+    gap: 6px;
+  }
+
+  .buttonGroup {
+    gap: 4px;
+  }
+
   .outlineBtn {
-    padding: 6px 8px;
-    font-size: 11px;
-    border-width: 1px;
+    padding: 4px 8px;
+    font-size: 9px;
   }
-  .brandName {
-    font-size: 14px;
+
+  .logoutBtn {
+    padding: 4px 8px;
+    font-size: 9px;
   }
-  .logoCircle {
-    width: 30px;
-    height: 30px;
-  }
+
   .avatar {
     width: 28px;
     height: 28px;
+    font-size: 11px;
+  }
+
+  .userProfile {
+    gap: 6px;
+  }
+
+  .userDetails {
+    display: none;
+  }
+
+  .dropdownBtn {
+    padding: 4px 8px;
+    font-size: 9px;
+    gap: 4px;
+  }
+
+  .dropdownBtn svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .dropdownMenu {
+    min-width: 140px;
+    padding: 4px;
+    right: -4px;
+  }
+
+  .dropdownItem {
+    padding: 5px 8px;
+    font-size: 10px;
+    gap: 5px;
+  }
+
+  .dropdownItem svg {
+    width: 10px;
+    height: 10px;
   }
 }

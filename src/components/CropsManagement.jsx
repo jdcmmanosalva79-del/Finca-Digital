@@ -3,18 +3,30 @@ import { doc, deleteDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAppContext } from '../context/AppContext';
 import NuevaSiembra from './NuevaSiembra';
-import { CROP_CATALOG } from '../server/constants/crops';
+import CropIcon from './CropIcon';
+import { CROP_CATALOG, getCropMetadata } from '../server/constants/crops';
 import { safeToDate, formatDate } from '../utils/dateUtils';
 
 import styles from './CropsManagement.module.css';
 
+
 export default function CropsManagement() {
-  const [tab, setTab] = useState('catalogo');
   const [editModal, setEditModal] = useState(null);
   const [taskModal, setTaskModal] = useState(null);
+  const [nuevaSiembraModal, setNuevaSiembraModal] = useState(false);
+  const [expandedCardId, setExpandedCardId] = useState(null);
+  const [filtroCultivo, setFiltroCultivo] = useState('todos');
   const { data, loading, showAlert, hideAlert } = useAppContext();
 
   const siembras = data.activeCrops || [];
+
+  const siembrasFiltradas = filtroCultivo === 'todos' 
+    ? siembras 
+    : siembras.filter(s => s.rubro === filtroCultivo);
+
+  const toggleCardExpand = (id) => {
+    setExpandedCardId(prevId => prevId === id ? null : id);
+  };
 
   const eliminarSiembra = async (id) => {
     showAlert({
@@ -111,88 +123,216 @@ export default function CropsManagement() {
     <div className={styles.wrapper}>
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>🌿 Gestión de Cultivos</h1>
-      </div>
-
-      <div className={styles.tabs}>
-        {['catalogo', 'activas', 'nueva'].map(t => (
-          <button key={t} className={`${styles.tab} ${tab === t ? styles.tabActive : ''}`} onClick={() => setTab(t)}>
-            {t === 'catalogo' ? '📚 Catálogo' : t === 'activas' ? '🌱 Activas' : '➕ Nueva'}
+        <div className={styles.headerActions}>
+          <select 
+            className={styles.filtroSelect} 
+            value={filtroCultivo} 
+            onChange={(e) => setFiltroCultivo(e.target.value)}
+          >
+            <option value="todos">Todos los Cultivos</option>
+            {CROP_CATALOG.map(c => (
+              <option key={c.key} value={c.key}>{c.key}</option>
+            ))}
+          </select>
+          <button className={styles.nuevaSiembraBtn} onClick={() => setNuevaSiembraModal(true)}>
+            + Nueva Siembra
           </button>
-        ))}
+        </div>
       </div>
 
-      {loading && tab === 'activas' && (
+      {loading && (
         <div className={styles.loadingState}>
           <div className={styles.spinner}></div>
           <p>Sincronizando con la finca...</p>
         </div>
       )}
 
-      {tab === 'catalogo' && (
-        <div className={styles.catalogGrid}>
-          {CROP_CATALOG.map(rubro => (
-            <div key={rubro.key} className={styles.catalogCard} style={{ background: rubro.bg }}>
-              <div className={styles.catalogTop}>
-                <span className={styles.catalogEmoji}>{rubro.emoji}</span>
-                <p className={styles.catalogName}>{rubro.key}</p>
-              </div>
-              <p className={styles.alertaText}>{rubro.alerta}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {tab === 'activas' && !loading && (
+      {!loading && (
         <div className={styles.siembrasGrid}>
           {siembras.length === 0 ? (
             <div className={styles.emptyState}>
               <p>No se encontraron siembras activas en este momento.</p>
-              <button onClick={() => setTab('nueva')} className={styles.confirmBtn}>Registrar Nueva Siembra</button>
+              <button onClick={() => setNuevaSiembraModal(true)} className={styles.confirmBtn}>Registrar Nueva Siembra</button>
             </div>
           ) : (
-            siembras.map(s => (
-              <div key={s.id} className={styles.siembraCard}>
-                <div className={styles.siembraHeader}>
-                  <div>
-                    <h3 className={styles.siembraRubro}>{s.rubro} - Lote {s.lote}</h3>
-                    <p className={styles.siembraMeta}>{s.hectareas} ha · {s.duracionDias} días</p>
-                  </div>
-                  <div className={styles.headerActions}>
-                    <button onClick={() => setEditModal(s)} className={styles.iconBtn}>✏️</button>
-                    <button onClick={() => eliminarSiembra(s.id)} className={styles.iconBtn}>🗑️</button>
-                  </div>
-                </div>
+            siembrasFiltradas.map(s => {
+              const meta = getCropMetadata(s.rubro);
+              const totalTareas = Array.isArray(s.tareas) ? s.tareas.length : 0;
+              const tareasCompletadas = Array.isArray(s.tareas) ? s.tareas.filter(t => t.completada).length : 0;
+              
+              let aguaClass = styles.aguaBaja;
+              if (meta.agua === 'Crítica') aguaClass = styles.aguaCritica;
+              else if (meta.agua === 'Alta' || meta.agua === 'Muy Alta') aguaClass = styles.aguaAlta;
 
-                <div className={styles.progressContainer}>
-                  <div className={styles.progressBar}><div className={styles.progressFill} style={{ width: `${s._progreso}%` }} /></div>
-                  <span className={styles.progressLabel}>{s._progreso}% completado</span>
-                </div>
-
-                <div className={styles.tasksSection}>
-                  <div className={styles.tasksHeader}>
-                    <h4 className={styles.tasksTitle}>Bitácora de Tareas</h4>
-                    <button className={styles.addTaskBtn} onClick={() => setTaskModal({ cropId: s.id, index: null, nombre: '', tipo: 'general', fecha: '' })}>+ Tarea</button>
+              return (
+                <div 
+                  key={s.id} 
+                  className={styles.siembraCard}
+                  style={{
+                    '--crop-accent': meta.color || '#10b981',
+                    '--crop-bg-gradient': meta.bg || 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'
+                  }}
+                >
+                  <div className={styles.siembraHeader}>
+                    <div className={styles.siembraTitleGroup}>
+                      <span 
+                        className={styles.cropEmojiBadge}
+                        style={{ 
+                          borderColor: meta.color || '#10b981',
+                          backgroundColor: `${meta.color || '#10b981'}15`
+                        }}
+                      >
+                        <CropIcon rubro={s.rubro} className={styles.cropIconSvg} />
+                      </span>
+                      <div className={styles.cropTextGroup}>
+                        <h3 className={styles.siembraRubro}>{s.rubro}</h3>
+                        <span className={styles.loteBadge}>Lote {s.lote}</span>
+                      </div>
+                    </div>
+                    <div className={styles.headerActions}>
+                      <button 
+                        onClick={() => toggleCardExpand(s.id)} 
+                        className={`${styles.iconBtn} ${expandedCardId === s.id ? styles.activeExpandBtn : ''}`} 
+                        title={expandedCardId === s.id ? 'Colapsar Bitácora' : 'Ver Bitácora'}
+                      >
+                        {expandedCardId === s.id ? (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                        ) : (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        )}
+                      </button>
+                      <button onClick={() => setEditModal(s)} className={styles.iconBtn} title="Editar Cultivo">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                      </button>
+                      <button onClick={() => eliminarSiembra(s.id)} className={`${styles.iconBtn} ${styles.deleteBtn}`} title="Eliminar Cultivo">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                      </button>
+                    </div>
                   </div>
-                  <ul className={styles.tareasList}>
-                    {(Array.isArray(s.tareas) ? s.tareas : []).map((t, i) => (
-                      <li key={i} className={styles.tareaItem}>
-                        <input type="checkbox" checked={t.completada} onChange={() => toggleTarea(s.id, s.tareas, i)} />
-                        <div className={styles.tareaDetails} onClick={() => setTaskModal({ cropId: s.id, index: i, ...t, fecha: safeToDate(t.fechaEjecucion).toISOString().split('T')[0] })}>
-                          <span className={styles.tareaName}>{t.nombre || 'Tarea General'}</span>
-                          <span className={styles.tareaDate}>{formatDate(t.fechaEjecucion)}</span>
+
+                  <div className={styles.cropStatsGrid}>
+                    <div className={styles.statItem}>
+                      <span className={styles.statValue}>{s.hectareas} ha</span>
+                      <span className={styles.statLabel}>SUPERFICIE</span>
+                    </div>
+                    <div className={styles.statItem}>
+                      <span className={styles.statValue}>{s.duracionDias} días</span>
+                      <span className={styles.statLabel}>DURACIÓN</span>
+                    </div>
+                    <div className={styles.statItem}>
+                      <span className={`${styles.statValue} ${styles.waterVal} ${aguaClass}`}>{meta.agua}</span>
+                      <span className={styles.statLabel}>AGUA</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.progressSection}>
+                    <div className={styles.progressTextInfo}>
+                      <span className={styles.progressPercentage}>{s._progreso}% completado</span>
+                      {totalTareas > 0 && (
+                        <span className={styles.taskSummaryText}>
+                          ✓ {tareasCompletadas}/{totalTareas} Tareas
+                        </span>
+                      )}
+                    </div>
+                    <div className={styles.progressBar}>
+                      <div 
+                        className={styles.progressFill} 
+                        style={{ 
+                          width: `${s._progreso}%`,
+                          background: `linear-gradient(90deg, var(--crop-accent) 0%, #10b981 100%)`
+                        }} 
+                      />
+                    </div>
+                    
+                    <div className={styles.timelineDates}>
+                      <div className={styles.dateGroup}>
+                        <span className={styles.dateIcon}>📅</span>
+                        <div className={styles.dateTexts}>
+                          <span className={styles.dateTitle}>Siembra</span>
+                          <span className={styles.dateVal}>{formatDate(s.fechaSiembra)}</span>
                         </div>
-                        <button onClick={() => eliminarTarea(s.id, i)} className={styles.deleteTaskBtn}>×</button>
-                      </li>
-                    ))}
-                  </ul>
+                      </div>
+                      <div className={styles.dateGroup}>
+                        <span className={styles.dateIcon}>🏁</span>
+                        <div className={styles.dateTexts}>
+                          <span className={styles.dateTitle}>Cosecha</span>
+                          <span className={styles.dateVal}>{formatDate(s.fechaFinalizacion)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {expandedCardId === s.id && (
+                    <div className={styles.tasksSection}>
+                      <div className={styles.tasksHeader}>
+                        <h4 className={styles.tasksTitle}>Bitácora de Actividades</h4>
+                        <button 
+                          className={styles.addTaskBtn} 
+                          onClick={() => setTaskModal({ cropId: s.id, index: null, nombre: '', tipo: 'general', fecha: '' })}
+                        >
+                          + Agregar Tarea
+                        </button>
+                      </div>
+                      <ul className={styles.tareasList}>
+                        {(Array.isArray(s.tareas) ? s.tareas : []).map((t, i) => {
+                          let badgeStyle = styles.badgeGeneral;
+                          if (t.tipo === 'riego') badgeStyle = styles.badgeRiego;
+                          else if (t.tipo === 'fertilizacion') badgeStyle = styles.badgeFertilizacion;
+                          else if (t.tipo === 'poda') badgeStyle = styles.badgePoda;
+                          else if (t.tipo === 'cosecha') badgeStyle = styles.badgeCosecha;
+
+                          return (
+                            <li key={i} className={`${styles.tareaItem} ${t.completada ? styles.tareaItemCompletada : ''}`}>
+                              <label className={styles.checkboxContainer}>
+                                <input 
+                                  type="checkbox" 
+                                  checked={t.completada} 
+                                  onChange={() => toggleTarea(s.id, s.tareas, i)} 
+                                  className={styles.tareaCheckboxInput}
+                                />
+                                <span className={styles.customCheckbox} />
+                              </label>
+                              
+                              <div 
+                                className={styles.tareaDetails} 
+                                onClick={() => setTaskModal({ 
+                                  cropId: s.id, 
+                                  index: i, 
+                                  ...t, 
+                                  fecha: safeToDate(t.fechaEjecucion).toISOString().split('T')[0] 
+                                })}
+                              >
+                                <div className={styles.tareaRow}>
+                                  <span className={styles.tareaName}>{t.nombre || 'Tarea General'}</span>
+                                  {t.tipo && <span className={`${styles.tareaTypeBadge} ${badgeStyle}`}>{t.tipo}</span>}
+                                </div>
+                                <span className={styles.tareaDate}>📅 {formatDate(t.fechaEjecucion)}</span>
+                              </div>
+                              <button onClick={() => eliminarTarea(s.id, i)} className={styles.deleteTaskBtn}>×</button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       )}
 
-      {tab === 'nueva' && <NuevaSiembra onSiembraCreada={() => setTab('activas')} />}
+      {nuevaSiembraModal && (
+        <div className={styles.modalOverlay} onClick={() => setNuevaSiembraModal(false)}>
+          <div className={styles.modalLarge} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Nueva Siembra</h2>
+              <button className={styles.modalCloseBtn} onClick={() => setNuevaSiembraModal(false)}>×</button>
+            </div>
+            <NuevaSiembra onSiembraCreada={() => setNuevaSiembraModal(false)} />
+          </div>
+        </div>
+      )}
 
       {editModal && (
         <div className={styles.modalOverlay} onClick={() => setEditModal(null)}>
@@ -218,6 +358,20 @@ export default function CropsManagement() {
             <form onSubmit={handleTaskSubmit} className={styles.modalForm}>
               <label>Nombre de la tarea</label>
               <input value={taskModal.nombre} onChange={e => setTaskModal({ ...taskModal, nombre: e.target.value })} required />
+              
+              <label>Tipo de tarea</label>
+              <select 
+                value={taskModal.tipo || 'general'} 
+                onChange={e => setTaskModal({ ...taskModal, tipo: e.target.value })}
+                className={styles.modalSelect}
+              >
+                <option value="general">⚙️ General</option>
+                <option value="riego">💧 Riego</option>
+                <option value="fertilizacion">🌱 Fertilización</option>
+                <option value="poda">✂️ Poda</option>
+                <option value="cosecha">🚜 Cosecha</option>
+              </select>
+
               <label>Fecha Programada</label>
               <input type="date" value={taskModal.fecha} onChange={e => setTaskModal({ ...taskModal, fecha: e.target.value })} required />
               <button type="submit" className={styles.confirmBtn}>Guardar Tarea</button>

@@ -406,3 +406,428 @@
   gap: 8px;
   font-weight: 500;
 }
+
+/* ── Responsive Design ── */
+
+/* Laptops/Tablets grandes (max-width: 1024px) */
+@media (max-width: 1024px) {
+  .wrapper {
+    padding: 24px 20px;
+  }
+
+  .card {
+    padding: 32px;
+  }
+
+  .cardHeader {
+    margin-bottom: 24px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .preview {
+    padding: 20px;
+  }
+
+  .timeline {
+    gap: 14px;
+  }
+
+  .timelineContent {
+    padding: 10px 14px;
+  }
+
+  .timelineDay {
+    font-size: 11px;
+  }
+
+  .timelineDesc {
+    font-size: 13px;
+  }
+
+  .timelineDate {
+    font-size: 11px;
+  }
+}
+
+/* Tablets (max-width: 768px) */
+@media (max-width: 768px) {
+  .wrapper {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .iconWrap {
+    width: 44px;
+    height: 44px;
+  }
+
+  .iconWrap svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+
+  .label {
+    font-size: 12px;
+  }
+
+  .labelIcon {
+    font-size: 14px;
+  }
+
+  .input,
+  .select {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+
+  .inputWrapper {
+    padding-left: 40px;
+  }
+
+  .inputIcon {
+    left: 12px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .requirementInfo {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .requirementInfo p {
+    font-size: 13px;
+  }
+
+  .requirementInfo small {
+    font-size: 11px;
+  }
+
+  .stockAlert {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .adjustBtn {
+    width: 100%;
+  }
+
+  .preview {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .previewTitle {
+    font-size: 14px;
+    gap: 8px;
+  }
+
+  .previewTitle svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .timeline {
+    gap: 12px;
+  }
+
+  .timelineItem {
+    padding-left: 0;
+  }
+
+  .timelineDot {
+    width: 8px;
+    height: 8px;
+    left: 4px;
+  }
+
+  .timeline::before {
+    left: 7px;
+  }
+
+  .timelineContent {
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+
+  .timelineDay {
+    font-size: 10px;
+  }
+
+  .timelineDesc {
+    font-size: 12px;
+  }
+
+  .timelineDate {
+    font-size: 10px;
+  }
+
+  .btnWrapper {
+    margin-top: 16px;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 13px;
+  }
+
+  .btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .feedback {
+    margin: 0 16px 16px;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 13px;
+  }
+
+  .tareasList {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .tareasList li {
+    font-size: 12px;
+  }
+}
+
+/* Móviles grandes (max-width: 480px) */
+@media (max-width: 480px) {
+  .wrapper {
+    padding: 12px;
+  }
+
+  .card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .cardHeader {
+    margin-bottom: 16px;
+  }
+
+  .iconWrap {
+    width: 40px;
+    height: 40px;
+  }
+
+  .iconWrap svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+  }
+
+  .grid {
+    gap: 12px;
+  }
+
+  .field {
+    margin-bottom: 12px;
+  }
+
+  .label {
+    font-size: 11px;
+  }
+
+  .input,
+  .select {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .inputWrapper {
+    padding-left: 36px;
+  }
+
+  .inputIcon {
+    left: 10px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .requirementInfo {
+    padding: 12px;
+  }
+
+  .requirementInfo p {
+    font-size: 12px;
+  }
+
+  .preview {
+    padding: 14px;
+  }
+
+  .previewTitle {
+    font-size: 13px;
+  }
+
+  .timeline {
+    gap: 10px;
+  }
+
+  .timelineContent {
+    padding: 8px 10px;
+  }
+
+  .timelineDay {
+    font-size: 9px;
+  }
+
+  .timelineDesc {
+    font-size: 11px;
+  }
+
+  .timelineDate {
+    font-size: 9px;
+  }
+
+  .btn {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+}
+
+/* Móviles pequeños (max-width: 360px) */
+@media (max-width: 360px) {
+  .wrapper {
+    padding: 10px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .cardHeader {
+    margin-bottom: 14px;
+  }
+
+  .iconWrap {
+    width: 36px;
+    height: 36px;
+  }
+
+  .iconWrap svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .subtitle {
+    font-size: 10px;
+  }
+
+  .grid {
+    gap: 10px;
+  }
+
+  .field {
+    margin-bottom: 10px;
+  }
+
+  .label {
+    font-size: 10px;
+  }
+
+  .input,
+  .select {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .inputWrapper {
+    padding-left: 32px;
+  }
+
+  .inputIcon {
+    left: 8px;
+    width: 14px;
+    height: 14px;
+  }
+
+  .preview {
+    padding: 12px;
+  }
+
+  .previewTitle {
+    font-size: 12px;
+  }
+
+  .timeline {
+    gap: 8px;
+  }
+
+  .timelineContent {
+    padding: 6px 8px;
+  }
+
+  .timelineDay {
+    font-size: 8px;
+  }
+
+  .timelineDesc {
+    font-size: 10px;
+  }
+
+  .timelineDate {
+    font-size: 8px;
+  }
+
+  .btn {
+    padding: 8px 14px;
+    font-size: 11px;
+  }
+}

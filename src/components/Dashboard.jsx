@@ -1,203 +1,268 @@
+import { useState, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
 import WeatherWidget from './WeatherWidget';
-import MiniChart from './MiniChart';
+import CropIcon from './CropIcon';
 import styles from './Dashboard.module.css';
+
+// Configuración visual de cada cultivo (colores del catálogo)
+const CROP_CONFIG = {
+  maíz:    { color: '#F59E0B', colorDim: '#FDE68A', label: 'Maíz' },
+  cacao:   { color: '#8B4513', colorDim: '#D4A574', label: 'Cacao' },
+  yuca:    { color: '#e07b54', colorDim: '#FBBF9A', label: 'Yuca' },
+  plátano: { color: '#3a9e8a', colorDim: '#86CCBE', label: 'Plátano' },
+  platano: { color: '#3a9e8a', colorDim: '#86CCBE', label: 'Plátano' },
+};
+
+const FALLBACK_CROPS = [
+  { key: 'maíz',    hectareas: 124.2, campos: 3 },
+  { key: 'cacao',   hectareas: 2.1,   campos: 1 },
+  { key: 'yuca',    hectareas: 14.7,  campos: 2 },
+  { key: 'plátano', hectareas: 2.0,   campos: 1 },
+];
+
+// Genera los segmentos SVG de la dona
+function buildSegments(crops, total) {
+  const circumference = 100; // perímetro normalizado (como % del círculo)
+  let offset = 0;
+  return crops.map((crop, i) => {
+    const pct = total > 0 ? (crop.hectareas / total) * circumference : 0;
+    const seg = { ...crop, pct, offset };
+    offset += pct;
+    return seg;
+  });
+}
+
+// SVG path circular estándar para la dona
+const CIRCLE_PATH = "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831";
 
 export default function Dashboard() {
   const { data, loading } = useAppContext();
+  const [hoveredKey, setHoveredKey] = useState(null);
+  const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, crop: null });
+  const svgRef = useRef(null);
 
   if (loading) return null;
-
-  const user = data.user || { nombre: 'admin', rol: 'Administrador', email: 'admin@fincadigital.com' };
-  const cropStats = data.cultivos || {};
 
   const weather = data?.weather || {};
   const isRainy = weather.pop > 50 || (weather.condition && weather.condition.toLowerCase().includes('lluvia'));
   const isSunny = weather.pop < 20 && weather.temp > 30;
 
-  let alertText = (
-    <>
-      • Clima estable: Condiciones óptimas para labores manuales. <br />
-      • Revisar bitácora de riego (Pendiente). <br />
-      • Realizar monitoreo preventivo de plagas.
-    </>
-  );
+  // ── Construir datos reales de cultivos ──
+  const cultivosMap = data.cultivos || {};
+  let cropList = Object.entries(cultivosMap)
+    .map(([key, val]) => ({
+      key,
+      hectareas: Number(val.hectareas) || 0,
+      campos: val.campos || 0,
+      count: val.count || 0,
+    }))
+    .filter(c => c.hectareas > 0);
 
-  if (isRainy) {
-    alertText = (
-      <>
-        • Alta probabilidad de lluvia ({weather.pop}%): Postergar fertilización. <br />
-        • Asegurar drenajes en lotes bajos. <br />
-        • Suspender labores de fumigación.
-      </>
-    );
-  } else if (isSunny) {
-    alertText = (
-      <>
-        • Alta temperatura ({weather.temp}°C): Aumentar frecuencia de riego. <br />
-        • Proteger plantines del sol directo. <br />
-        • Hidratar al personal de campo.
-      </>
-    );
-  }
+  if (cropList.length === 0) cropList = FALLBACK_CROPS;
+
+  const total = cropList.reduce((s, c) => s + c.hectareas, 0);
+  const segments = buildSegments(cropList, total);
+
+  const handleMouseEnter = (seg, e) => {
+    setHoveredKey(seg.key);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltip({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+      crop: seg,
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    if (tooltip.visible) {
+      setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY }));
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredKey(null);
+    setTooltip(prev => ({ ...prev, visible: false }));
+  };
+
+  const activeSeg = hoveredKey ? segments.find(s => s.key === hoveredKey) : null;
+  const pct = activeSeg ? ((activeSeg.hectareas / total) * 100).toFixed(1) : null;
 
   return (
     <div className={styles.dashboard}>
       <div className={styles.mainGrid}>
-        
+
         {/* ROW 1: Clima (Izq) y Donut Chart (Der) */}
         <div className={styles.rowTop}>
           <div className={styles.weatherWrapper}>
             <WeatherWidget />
           </div>
-          
+
+          {/* ══ DONA INTERACTIVA ══ */}
           <div className={styles.donutCard}>
-            <h3 className={styles.cardTitle}>Total Hectares Donut Chart</h3>
+            <div className={styles.donutCardHeader}>
+              <h3 className={styles.cardTitle}>Hectáreas por Siembra</h3>
+              <span className={styles.donutBadge}>{total.toFixed(1)} ha total</span>
+            </div>
+
             <div className={styles.donutContent}>
-              <div className={styles.donutChartContainer}>
-                <svg viewBox="0 0 36 36" className={styles.donutSvg}>
-                  {/* Simplistic donut chart matching design */}
-                  <path className={styles.donutRing} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e5e7eb" strokeWidth="6" />
-                  <path className={styles.donutSegmentBlue} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#3b82f6" strokeWidth="6" strokeDasharray="65 35" strokeDashoffset="25" />
-                  <path className={styles.donutSegmentOrange} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f59e0b" strokeWidth="6" strokeDasharray="35 65" strokeDashoffset="-40" />
+              {/* Gráfico SVG */}
+              <div className={styles.donutChartContainer} onMouseMove={handleMouseMove}>
+                <svg
+                  ref={svgRef}
+                  viewBox="0 0 36 36"
+                  className={styles.donutSvg}
+                >
+                  {/* Track base */}
+                  <path
+                    d={CIRCLE_PATH}
+                    fill="none"
+                    stroke="#f3f4f6"
+                    strokeWidth="5"
+                  />
+
+                  {/* Segmentos reales */}
+                  {segments.map((seg) => {
+                    const cfg = CROP_CONFIG[seg.key] || { color: '#9ca3af', label: seg.key };
+                    const isActive = hoveredKey === seg.key;
+                    const isDimmed = hoveredKey && !isActive;
+                    return (
+                      <path
+                        key={seg.key}
+                        d={CIRCLE_PATH}
+                        fill="none"
+                        stroke={isDimmed ? cfg.colorDim || cfg.color + '55' : cfg.color}
+                        strokeWidth={isActive ? "6.5" : "5"}
+                        strokeDasharray={`${seg.pct} ${100 - seg.pct}`}
+                        strokeDashoffset={-seg.offset}
+                        strokeLinecap="round"
+                        style={{
+                          transition: 'stroke-width 0.2s ease, stroke 0.2s ease, opacity 0.2s ease',
+                          cursor: 'pointer',
+                          filter: isActive ? `drop-shadow(0 0 3px ${cfg.color}88)` : 'none',
+                        }}
+                        onMouseEnter={(e) => handleMouseEnter(seg, e)}
+                        onMouseLeave={handleMouseLeave}
+                      />
+                    );
+                  })}
                 </svg>
+
+                {/* Centro dinámico */}
                 <div className={styles.donutCenter}>
-                  <span className={styles.donutValueTotal}>143.0 ha</span>
+                  {activeSeg ? (
+                    <>
+                      <CropIcon
+                        rubro={activeSeg.key}
+                        className={styles.donutCenterSvg}
+                      />
+                      <span className={styles.donutCenterPct}>{pct}%</span>
+                      <span className={styles.donutCenterSub}>
+                        {activeSeg.hectareas.toFixed(1)} ha
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className={styles.donutValueTotal}>{total.toFixed(1)}</span>
+                      <span className={styles.donutCenterUnit}>ha</span>
+                    </>
+                  )}
                 </div>
               </div>
+
+              {/* Leyenda interactiva */}
               <div className={styles.donutLegend}>
                 <div className={styles.legendHeader}>
-                  <span className={styles.lCrop}>Crop</span>
-                  <span className={styles.lHect}>Hectares</span>
+                  <span className={styles.lCrop}>Cultivo</span>
+                  <span className={styles.lHect}>Hectáreas</span>
                 </div>
-                <div className={styles.legendRow}>
-                  <span className={styles.lCropName}>🌽 Maíz</span>
-                  <span className={styles.lCropVal}>124.2 ha</span>
-                </div>
-                <div className={styles.legendRow}>
-                  <span className={styles.lCropName}>🥥 Cacao</span>
-                  <span className={styles.lCropVal}>2.1 ha</span>
-                </div>
-                <div className={styles.legendRow}>
-                  <span className={styles.lCropName}>🍠 Yuca</span>
-                  <span className={styles.lCropVal}>14.7 ha</span>
-                </div>
-                <div className={styles.legendRow}>
-                  <span className={styles.lCropName}>🍌 Platano</span>
-                  <span className={styles.lCropVal}>2 ha</span>
-                </div>
+                {segments.map((seg) => {
+                  const cfg = CROP_CONFIG[seg.key] || { color: '#9ca3af', emoji: '🌱', label: seg.key };
+                  const isActive = hoveredKey === seg.key;
+                  const isDimmed = hoveredKey && !isActive;
+                  const segPct = total > 0 ? ((seg.hectareas / total) * 100).toFixed(1) : '0';
+                  return (
+                    <div
+                      key={seg.key}
+                      className={`${styles.legendRow} ${isActive ? styles.legendRowActive : ''} ${isDimmed ? styles.legendRowDimmed : ''}`}
+                      onMouseEnter={() => setHoveredKey(seg.key)}
+                      onMouseLeave={() => setHoveredKey(null)}
+                    >
+                      <div className={styles.lCropName}>
+                        <span
+                          className={styles.lDot}
+                          style={{ background: cfg.color }}
+                        />
+                        <CropIcon rubro={seg.key} className={styles.lCropSvg} />
+                        <span>{cfg.label || seg.key}</span>
+                      </div>
+                      <div className={styles.lRight}>
+                        <span className={styles.lCropVal}>{seg.hectareas.toFixed(1)} ha</span>
+                        <span className={styles.lCropPct}>{segPct}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
+            </div>
+
+            {/* Barra proporcional al fondo */}
+            <div className={styles.donutBarRow}>
+              {segments.map((seg) => {
+                const cfg = CROP_CONFIG[seg.key] || { color: '#9ca3af' };
+                const isActive = hoveredKey === seg.key;
+                return (
+                  <div
+                    key={seg.key}
+                    className={styles.donutBar}
+                    style={{
+                      flex: seg.hectareas,
+                      background: cfg.color,
+                      opacity: hoveredKey && !isActive ? 0.35 : 1,
+                    }}
+                    onMouseEnter={() => setHoveredKey(seg.key)}
+                    onMouseLeave={() => setHoveredKey(null)}
+                    title={`${cfg.label || seg.key}: ${seg.hectareas.toFixed(1)} ha`}
+                  />
+                );
+              })}
             </div>
           </div>
         </div>
 
-        {/* ROW 2: Gráfico Grande de Cultivos */}
-        <div className={styles.rowMiddle}>
-          <div className={styles.largeChartCard}>
-            <h3 className={styles.cardTitle}>Resumen de Cultivos Activos</h3>
-            <div className={styles.largeChartContent}>
-              {/* Fake Chart representation for design match */}
-              <div className={styles.chartGraphic}>
-                <div className={styles.chartLines}>
-                  {/* We use SVG to draw the fake lines */}
-                  <svg width="100%" height="100%" viewBox="0 0 1000 200" preserveAspectRatio="none">
-                    <path d="M0,150 Q250,50 500,100 T1000,120" fill="none" stroke="#f59e0b" strokeWidth="3" opacity="0.8"/>
-                    <path d="M0,100 Q200,180 600,80 T1000,160" fill="none" stroke="#3b82f6" strokeWidth="3" opacity="0.8"/>
-                    <path d="M0,180 Q400,20 700,150 T1000,100" fill="none" stroke="#8b4513" strokeWidth="3" opacity="0.8"/>
-                    <path d="M0,120 Q300,150 500,180 T1000,80" fill="none" stroke="#10b981" strokeWidth="3" opacity="0.8"/>
-                    
-                    {/* Dots on lines */}
-                    <circle cx="250" cy="50" r="12" fill="#f59e0b" />
-                    <circle cx="200" cy="180" r="12" fill="#3b82f6" />
-                    <circle cx="400" cy="20" r="12" fill="#8b4513" />
-                    <circle cx="700" cy="150" r="12" fill="#10b981" />
-                    
-                    {/* Vertical lines connecting dots to X axis */}
-                    <line x1="250" y1="50" x2="250" y2="200" stroke="#f59e0b" strokeDasharray="4 4" />
-                    <line x1="200" y1="180" x2="200" y2="200" stroke="#3b82f6" strokeDasharray="4 4" />
-                    <line x1="400" y1="20" x2="400" y2="200" stroke="#8b4513" strokeDasharray="4 4" />
-                    <line x1="700" y1="150" x2="700" y2="200" stroke="#10b981" strokeDasharray="4 4" />
-                  </svg>
-                </div>
-                <div className={styles.chartXAxis}>
-                  <span>1 dias</span>
-                  <span>2 dias</span>
-                  <span>3 dias</span>
-                  <span>5 dias</span>
-                  <span>6 dias</span>
-                  <span>7 dias</span>
-                </div>
-              </div>
-              <div className={styles.chartCardsRow}>
-                {Object.entries(cropStats).filter(([_, s]) => s.count > 0).slice(0, 4).map(([key, s]) => (
-                  <div key={key} className={styles.smallCropCard}>
-                    <div className={styles.sCropIcon}>
-                      <img
-                        src={`/${key}.png`}
-                        alt={key}
-                        onError={(e) => { e.target.onerror = null; e.target.src = '/generic_plant.png'; }}
-                      />
-                    </div>
-                    <div className={styles.sCropInfo}>
-                      <h4 className={styles.sCropTitle}>{key.charAt(0).toUpperCase() + key.slice(1)}</h4>
-                      <p className={styles.sCropDesc}>{s.campos} campos activos</p>
-                    </div>
-                    <div className={styles.sCropStats}>
-                      <p className={styles.sCropVal}>{s.hectareas}</p>
-                      <p className={styles.sCropSub}>{key.charAt(0).toUpperCase() + key.slice(1)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ROW 3: Logistica y Estadisticas */}
-        <div className={styles.rowBottom}>
-          <div className={styles.logisticaCard}>
-            <div className={styles.logHeader}>
-              <div className={styles.logIconWrapper}>
-                <span style={{ fontSize: '24px' }}>⚠️</span>
-              </div>
-              <h3 className={styles.logTitle}>Logistica / Tareas</h3>
-            </div>
-            <div className={styles.logContent}>
-              <ul className={styles.logList}>
-                <li>⚙️ Garantizar condiciones óptimas para labores manuales.</li>
-                <li>⚙️ Revisar bitácora de riego (Pendiente).</li>
-                <li>⚙️ Realizar monitoreo preventivo de plagas.</li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className={styles.estCard}>
-            <div className={styles.estHeader}>
-              <h3 className={styles.estTitle}>Estadísticas Territoriales</h3>
-              <p className={styles.estSub}>Distribución de Hectáreas - Territorio</p>
-            </div>
-            <div className={styles.estContent}>
-              <div className={styles.estLeft}>
-                <div className={styles.laurelWreath}>
-                  <span className={styles.estNum}>11</span>
-                  <p className={styles.estLabel}>TOTAL CULTIVOS<br/>ACTIVOS</p>
-                </div>
-              </div>
-              <div className={styles.estCenter}>
-                <img src="/generic_plant.png" alt="Plant" className={styles.estPlantImg} />
-              </div>
-              <div className={styles.estRight}>
-                <ul className={styles.estList}>
-                  <li>Maíz (124.2)</li>
-                  <li>Cacao (2.1)</li>
-                  <li>Yuca (14.7)</li>
-                  <li>Platano (2)</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
+
+      {/* Tooltip flotante */}
+      {tooltip.visible && tooltip.crop && (() => {
+        const seg = tooltip.crop;
+        const cfg = CROP_CONFIG[seg.key] || { color: '#9ca3af', emoji: '🌱', label: seg.key };
+        const segPct = total > 0 ? ((seg.hectareas / total) * 100).toFixed(1) : '0';
+        return (
+          <div
+            className={styles.donutTooltip}
+            style={{ left: tooltip.x + 14, top: tooltip.y - 10 }}
+          >
+            <div className={styles.tooltipHeader} style={{ borderColor: cfg.color }}>
+              <CropIcon rubro={seg.key} className={styles.tooltipSvg} />
+              <strong>{cfg.label || seg.key}</strong>
+            </div>
+            <div className={styles.tooltipRow}>
+              <span>Hectáreas</span>
+              <strong>{seg.hectareas.toFixed(1)} ha</strong>
+            </div>
+            <div className={styles.tooltipRow}>
+              <span>Participación</span>
+              <strong>{segPct}%</strong>
+            </div>
+            {seg.campos > 0 && (
+              <div className={styles.tooltipRow}>
+                <span>Lotes</span>
+                <strong>{seg.campos}</strong>
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }

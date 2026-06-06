@@ -62,9 +62,21 @@
 }
 
 .navItem.active {
-  color: var(--gray-900);
+  color: #10b981;
   background-color: var(--gray-100);
   border-radius: 12px;
+}
+
+.navItem.active .icon {
+  color: #10b981;
+}
+
+.navItem.active .icon svg {
+  stroke: #10b981;
+}
+
+.navItem.active .label {
+  color: #10b981;
 }
 
 .navItem:hover {

@@ -23,6 +23,7 @@
   letter-spacing: -0.04em;
   background: linear-gradient(90deg, #10b981, #059669);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -506,15 +507,387 @@
   font-size: 18px;
 }
 
+/* ── Responsive Design ── */
+
+/* Tablets (768px - 1024px) */
+@media (max-width: 1024px) {
+  .formGrid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .historyGrid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+  }
+
+  .satInfoCard {
+    padding: 24px;
+    gap: 20px;
+  }
+
+  .satCard {
+    padding: 32px;
+  }
+
+  .formCard {
+    padding: 40px;
+  }
+}
+
+/* Móviles grandes (480px - 768px) */
 @media (max-width: 768px) {
+  .container {
+    padding: 24px 16px;
+  }
+
+  .header {
+    margin-bottom: 24px;
+    max-width: 100%;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .tabBtn {
+    padding: 10px 16px;
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .locationBtn {
+    padding: 10px 16px;
+    font-size: 13px;
+    width: 100%;
+    text-align: center;
+  }
 
   .formCard,
   .satCard,
   .historyCard {
-    padding: 32px;
+    padding: 24px;
+    border-radius: 24px;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .formGroup input,
+  .formGroup textarea {
+    padding: 14px 16px;
+    font-size: 16px;
+  }
+
+  .formActions {
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .clearBtn,
+  .submitBtn {
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+  }
+
+  .historyGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .historyCard {
+    padding: 20px;
   }
 
   .metricsGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .metricItem {
+    padding: 16px 8px;
+  }
+
+  .metricValue {
+    font-size: 20px;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .headerLeft h3 {
+    font-size: 20px;
+  }
+
+  .recommendationBox {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .recommendationBox h4 {
+    font-size: 14px;
+  }
+
+  .recommendationBox p {
+    font-size: 14px;
+  }
+
+  .satInfoCard {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .satInfoIcon {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+
+  .satInfoText h3 {
+    font-size: 18px;
+  }
+
+  .satInfoText p {
+    font-size: 14px;
+  }
+
+  .satCard {
+    padding: 24px;
+  }
+
+  .satHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .satIcon {
+    font-size: 36px;
+  }
+
+  .satMapContainer {
+    height: 280px;
+    margin: 20px 0;
+    border-radius: 20px;
+  }
+
+  .satData {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .satRow {
+    font-size: 14px;
+    padding: 12px 0;
+  }
+
+  .importBtn {
+    padding: 16px;
+    font-size: 16px;
+    border-radius: 16px;
+  }
+
+  .alertBox {
+    padding: 16px;
+    font-size: 13px;
+  }
+
+  .warningCard {
+    padding: 40px 24px;
+  }
+
+  .warningCard h3 {
+    font-size: 20px;
+  }
+
+  .empty {
+    padding: 40px 20px;
+    font-size: 16px;
+  }
+}
+
+/* Móviles pequeños (< 480px) */
+@media (max-width: 480px) {
+  .container {
+    padding: 16px 12px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .tabs {
+    padding: 6px;
+    border-radius: 16px;
+  }
+
+  .tabBtn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .locationBtn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .formCard,
+  .satCard,
+  .historyCard {
+    padding: 20px 16px;
+    border-radius: 20px;
+  }
+
+  .formGroup label {
+    font-size: 12px;
+  }
+
+  .formGroup input,
+  .formGroup textarea {
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+
+  .metricsGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .metricItem {
+    padding: 14px;
+  }
+
+  .metricValue {
+    font-size: 24px;
+  }
+
+  .metricLabel {
+    font-size: 11px;
+  }
+
+  .metricStatus {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .historyCard {
+    padding: 16px;
+  }
+
+  .historyCard::before {
+    width: 6px;
+  }
+
+  .headerLeft h3 {
+    font-size: 18px;
+  }
+
+  .date {
+    font-size: 12px;
+  }
+
+  .deleteBtn {
+    padding: 8px;
+  }
+
+  .recommendationBox {
+    padding: 14px;
+  }
+
+  .recommendationBox h4 {
+    font-size: 13px;
+  }
+
+  .recommendationBox p {
+    font-size: 13px;
+  }
+
+  .satInfoCard {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .satInfoIcon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .satInfoText h3 {
+    font-size: 16px;
+  }
+
+  .satInfoText p {
+    font-size: 13px;
+  }
+
+  .satCard {
+    padding: 20px 16px;
+    border-radius: 24px;
+  }
+
+  .satHeader h3 {
+    font-size: 18px;
+  }
+
+  .satMapContainer {
+    height: 220px;
+    border-radius: 16px;
+  }
+
+  .satData {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .satRow {
+    font-size: 13px;
+    padding: 10px 0;
+  }
+
+  .importBtn {
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  .alertBox {
+    padding: 14px;
+    font-size: 12px;
+  }
+
+  .warningCard {
+    padding: 32px 20px;
+    border-radius: 24px;
+  }
+
+  .warningCard h3 {
+    font-size: 18px;
+  }
+
+  .empty {
+    padding: 32px 16px;
+    font-size: 14px;
   }
 }

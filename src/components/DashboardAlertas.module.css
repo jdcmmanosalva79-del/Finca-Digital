@@ -261,74 +261,38 @@
 /* Cultivos Grid Premium */
 .cropGridPremium {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-  padding: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  padding: 20px;
 }
 
 .cropCardPremium {
-  border: none;
-  border-radius: 24px;
-  padding: 24px;
-  color: white;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.3s ease;
   position: relative;
-  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .cropCardPremium:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: var(--gray-300);
 }
 
-.bgDefault { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25); }
-.bgDefault:hover { box-shadow: 0 12px 32px rgba(16, 185, 129, 0.35); }
-
-.bgMaiz { background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); box-shadow: 0 8px 24px rgba(202, 138, 4, 0.25); }
-.bgMaiz:hover { box-shadow: 0 12px 32px rgba(202, 138, 4, 0.35); }
-
-.bgCacao { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); box-shadow: 0 8px 24px rgba(109, 40, 217, 0.25); }
-.bgCacao:hover { box-shadow: 0 12px 32px rgba(109, 40, 217, 0.35); }
-
-.bgYuca { background: linear-gradient(135deg, #e11d48 0%, #9f1239 100%); box-shadow: 0 8px 24px rgba(225, 29, 72, 0.25); }
-.bgYuca:hover { box-shadow: 0 12px 32px rgba(225, 29, 72, 0.35); }
-
-.bgPlatano { background: linear-gradient(135deg, #84cc16 0%, #4d7c0f 100%); box-shadow: 0 8px 24px rgba(77, 124, 15, 0.25); }
-.bgPlatano:hover { box-shadow: 0 12px 32px rgba(77, 124, 15, 0.35); }
-
-.bgCafe { background: linear-gradient(135deg, #78350f 0%, #451a03 100%); box-shadow: 0 8px 24px rgba(69, 26, 3, 0.25); }
-.bgCafe:hover { box-shadow: 0 12px 32px rgba(69, 26, 3, 0.35); }
-
-
-/* Glass effect overlay for extra premium feel */
-.cropCardPremium::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.15), transparent);
-  pointer-events: none;
-}
+.bgDefault { border-top: 4px solid #10b981; }
+.bgMaiz { border-top: 4px solid #eab308; }
+.bgCacao { border-top: 4px solid #8b5cf6; }
+.bgYuca { border-top: 4px solid #e11d48; }
+.bgPlatano { border-top: 4px solid #84cc16; }
+.bgCafe { border-top: 4px solid #78350f; }
 
 .cropCardHeader {
   display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
-  position: relative;
-  z-index: 1;
-}
-
-.cropIconWrapper {
-  width: 48px;
-  height: 48px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(8px);
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .cropMainInfo {
@@ -337,69 +301,100 @@
   justify-content: center;
 }
 
-.cropRubroTitle { font-size: 18px; font-weight: 800; color: white; margin: 0; }
-.cropLoteSub { font-size: 13px; color: rgba(255, 255, 255, 0.85); margin: 2px 0 0 0; }
+.cropRubroTitle { 
+  font-size: 16px; 
+  font-weight: 800; 
+  color: var(--gray-900); 
+  margin: 0; 
+  letter-spacing: -0.01em;
+}
+
+.cropLoteSub { 
+  font-size: 12px; 
+  color: var(--gray-500); 
+  margin: 4px 0 0 0; 
+  font-weight: 500;
+}
 
 .cropStatusRow {
   display: flex;
   justify-content: space-between;
   margin-bottom: 8px;
-  position: relative;
-  z-index: 1;
 }
 
-.statusLabel { font-size: 12px; font-weight: 600; color: rgba(255, 255, 255, 0.8); }
-.statusValue { font-size: 13px; font-weight: 800; color: white; }
+.statusLabel { 
+  font-size: 11px; 
+  font-weight: 700; 
+  color: var(--gray-500); 
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statusValue { 
+  font-size: 13px; 
+  font-weight: 800; 
+  color: var(--gray-900); 
+}
 
 .progressContainerPremium {
-  height: 8px;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 20px;
+  height: 6px;
+  background: var(--gray-100);
+  border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 20px;
-  position: relative;
-  z-index: 1;
+  margin-bottom: 16px;
 }
 
 .progressFillPremium {
   height: 100%;
-  background: white;
-  border-radius: 20px;
+  border-radius: 10px;
   transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
+
+.bgDefault .progressFillPremium { background: #10b981; }
+.bgMaiz .progressFillPremium { background: #eab308; }
+.bgCacao .progressFillPremium { background: #8b5cf6; }
+.bgYuca .progressFillPremium { background: #e11d48; }
+.bgPlatano .progressFillPremium { background: #84cc16; }
+.bgCafe .progressFillPremium { background: #78350f; }
 
 .cropFooterPremium {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  position: relative;
-  z-index: 1;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-100);
 }
 
 .footerItem { display: flex; flex-direction: column; gap: 2px; }
-.footerLabel { font-size: 10px; color: rgba(255, 255, 255, 0.7); text-transform: uppercase; font-weight: 700; }
-.footerValue { font-size: 14px; font-weight: 800; color: white; }
+.footerLabel { 
+  font-size: 10px; 
+  color: var(--gray-400); 
+  text-transform: uppercase; 
+  font-weight: 700; 
+  letter-spacing: 0.05em;
+}
+
+.footerValue { 
+  font-size: 14px; 
+  font-weight: 800; 
+  color: var(--gray-900); 
+}
 
 .finalizarBtnPremium {
-  background: white;
-  color: #059669;
+  background: var(--gray-900);
+  color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .finalizarBtnPremium:hover { 
-  background: #f3f4f6; 
-  transform: translateY(-2px); 
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  background: #000; 
+  transform: translateY(-1px); 
 }
 
 /* Common States */

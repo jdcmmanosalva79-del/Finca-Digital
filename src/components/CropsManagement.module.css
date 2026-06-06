@@ -1,11 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 .wrapper {
   padding: 32px;
   background-color: #f3f4f6;
   min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .pageHeader {
   margin-bottom: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .pageTitle {
@@ -13,6 +19,61 @@
   font-weight: 800;
   color: var(--gray-900);
   letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.filtroSelect {
+  padding: 12px 16px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-700);
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 200px;
+}
+
+.filtroSelect:hover {
+  border-color: var(--teal);
+}
+
+.filtroSelect:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(42, 125, 111, 0.1);
+}
+
+.nuevaSiembraBtn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nuevaSiembraBtn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.nuevaSiembraBtn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .tabs {
@@ -100,115 +161,328 @@
 }
 
 .siembraCard {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(249, 250, 251, 0.98) 100%);
+  backdrop-filter: blur(20px);
   padding: 28px;
-  border-radius: 28px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  transition: all 0.3s;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.siembraCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 6px;
+  background: var(--crop-accent, #10b981);
+  transition: width 0.3s ease;
+}
+
+.siembraCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.siembraCard:hover::before {
+  width: 8px;
 }
 
 .siembraHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
+  align-items: center;
+  padding-left: 8px;
+}
+
+.siembraTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cropEmojiBadge {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+  transition: transform 0.3s ease;
+}
+
+.siembraCard:hover .cropEmojiBadge {
+  transform: scale(1.08) rotate(5deg);
+}
+
+.cropIconSvg {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.cropTextGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .siembraRubro {
   font-size: 20px;
   font-weight: 800;
-  color: var(--gray-900);
-  margin-bottom: 4px;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.5px;
 }
 
-.siembraMeta {
-  font-size: 13px;
-  color: var(--gray-500);
-  font-weight: 600;
+.loteBadge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 3px 10px;
+  border-radius: 20px;
+  width: fit-content;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .headerActions {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .iconBtn {
-  background: white;
+  background: #f8fafc;
   border: 1px solid rgba(0, 0, 0, 0.05);
   width: 36px;
   height: 36px;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  color: #64748b;
 }
 
 .iconBtn:hover {
-  background: #f9fafb;
-  transform: scale(1.05);
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+  transform: translateY(-2px);
 }
 
-/* Progress */
-.progressContainer {
-  margin-bottom: 28px;
+.activeExpandBtn {
+  background: #e2e8f0;
+  color: #0f172a;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.deleteBtn {
+  color: #ef4444;
+  background: #fef2f2;
+  border-color: #fee2e2;
+}
+
+.deleteBtn:hover {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+/* Panel de Estadísticas (Grid) */
+.cropStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 16px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  margin: 4px 0;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.statItem:not(:last-child) {
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.statValue {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.waterVal {
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.aguaCritica {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.aguaAlta {
+  color: #0369a1;
+  background: #e0f2fe;
+}
+
+.aguaBaja {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.statLabel {
+  font-size: 9px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+/* Sección de progreso y fechas */
+.progressSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 8px;
+}
+
+.progressTextInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progressPercentage {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.taskSummaryText {
+  font-size: 12px;
+  font-weight: 700;
+  color: #10b981;
+  background: #ecfdf5;
+  padding: 2px 8px;
+  border-radius: 8px;
 }
 
 .progressBar {
-  height: 10px;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 5px;
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 10px;
+  position: relative;
 }
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, #10b981, #34d399);
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 10px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
-.progressLabel {
+.timelineDates {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.dateGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dateIcon {
+  font-size: 16px;
+}
+
+.dateTexts {
+  display: flex;
+  flex-direction: column;
+}
+
+.dateTitle {
+  font-size: 9px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.dateVal {
   font-size: 12px;
-  font-weight: 800;
-  color: var(--gray-500);
+  font-weight: 700;
+  color: #475569;
 }
 
-/* Tasks Section */
+/* Sección de Tareas en Vista Expandida */
+.tasksSection {
+  margin-top: 12px;
+  padding: 18px 8px 4px 8px;
+  border-top: 1.5px dashed #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .tasksHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
 }
 
 .tasksTitle {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 800;
-  color: var(--gray-900);
+  color: #475569;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .addTaskBtn {
-  background: var(--gray-900);
-  color: white;
-  border: none;
+  background: #0f172a;
+  color: #ffffff;
   padding: 8px 16px;
   border-radius: 10px;
   font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.2s;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
 }
 
 .addTaskBtn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background: #334155;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.2);
 }
 
 .tareasList {
@@ -216,24 +490,92 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .tareaItem {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px;
-  background: white;
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.03);
-  transition: all 0.2s;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
 }
 
 .tareaItem:hover {
-  transform: translateX(4px);
-  border-color: var(--gray-200);
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transform: translateX(2px);
+}
+
+.tareaItemCompletada {
+  background: #f1f5f9;
+  border-color: rgba(0, 0, 0, 0.01);
+  opacity: 0.75;
+}
+
+.tareaItemCompletada .tareaName {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+/* Custom Checkbox */
+.checkboxContainer {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.tareaCheckboxInput {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.customCheckbox {
+  height: 20px;
+  width: 20px;
+  background-color: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 6px;
+  display: inline-block;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.checkboxContainer:hover .customCheckbox {
+  border-color: var(--crop-accent, #10b981);
+}
+
+.tareaCheckboxInput:checked ~ .customCheckbox {
+  background-color: var(--crop-accent, #10b981);
+  border-color: var(--crop-accent, #10b981);
+}
+
+.customCheckbox::after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.tareaCheckboxInput:checked ~ .customCheckbox::after {
+  display: block;
 }
 
 .tareaDetails {
@@ -241,34 +583,103 @@
   display: flex;
   flex-direction: column;
   cursor: pointer;
+  gap: 2px;
+}
+
+.tareaRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .tareaName {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
-  color: var(--gray-900);
+  color: #334155;
+  transition: color 0.2s;
 }
 
 .tareaDate {
-  font-size: 12px;
-  color: var(--gray-500);
+  font-size: 11px;
+  color: #94a3b8;
   font-weight: 600;
-  margin-top: 2px;
+}
+
+/* Badges para Tipos de Tareas */
+.tareaTypeBadge {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badgeGeneral {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.badgeRiego {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.badgeFertilizacion {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badgePoda {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.badgeCosecha {
+  background: #fef3c7;
+  color: #b45309;
 }
 
 .deleteTaskBtn {
   background: transparent;
   border: none;
-  color: #ef4444;
-  font-size: 20px;
+  color: #94a3b8;
+  font-size: 18px;
+  font-weight: 600;
   cursor: pointer;
-  padding: 4px;
-  opacity: 0.5;
-  transition: opacity 0.2s;
+  padding: 2px 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .tareaItem:hover .deleteTaskBtn {
-  opacity: 1;
+  color: #ef4444;
+  background: #fef2f2;
+}
+
+.deleteTaskBtn:hover {
+  transform: scale(1.1);
+}
+
+.modalSelect {
+  padding: 16px;
+  border-radius: 16px;
+  border: 2px solid #f3f4f6;
+  font-size: 15px;
+  font-weight: 600;
+  background: white;
+  color: var(--gray-800);
+  outline: none;
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+
+.modalSelect:focus {
+  border-color: var(--gray-900);
 }
 
 /* States */
@@ -338,6 +749,53 @@
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
+.modalLarge {
+  background: white;
+  border-radius: 32px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.modalTitle {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.modalCloseBtn {
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gray-600);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.modalCloseBtn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--gray-900);
+}
+
 .modalForm {
   display: flex;
   flex-direction: column;
@@ -401,5 +859,627 @@
 
   .mapSection {
     height: 450px;
+  }
+}
+
+/* ── Responsive Design Completo ── */
+
+/* Tablets (768px - 1024px) */
+@media (max-width: 1024px) {
+  .wrapper {
+    padding: 24px 20px;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .headerActions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .filtroSelect {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .nuevaSiembraBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .catalogGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .siembrasGrid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  .siembraCard {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .siembraRubro {
+    font-size: 18px;
+  }
+
+  .cropEmojiBadge {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+
+  .cropStatsGrid {
+    padding: 12px 6px;
+  }
+
+  .statValue {
+    font-size: 14px;
+  }
+
+  .modal {
+    padding: 32px;
+    max-width: 450px;
+  }
+
+  .modalLarge {
+    max-width: 800px;
+  }
+}
+
+/* Móviles grandes (480px - 768px) */
+@media (max-width: 768px) {
+  .wrapper {
+    padding: 20px 16px;
+  }
+
+  .pageTitle {
+    font-size: 24px;
+  }
+
+  .pageHeader {
+    margin-bottom: 24px;
+  }
+
+  .headerActions {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .filtroSelect {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .nuevaSiembraBtn {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .tabs {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+
+  .tab {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .catalogGrid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .catalogCard {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .catalogEmoji {
+    font-size: 28px;
+  }
+
+  .catalogName {
+    font-size: 18px;
+  }
+
+  .alertaText {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .siembrasGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .siembraCard {
+    padding: 16px;
+    border-radius: 16px;
+    gap: 14px;
+  }
+
+  .siembraHeader {
+    padding-left: 6px;
+  }
+
+  .siembraTitleGroup {
+    gap: 12px;
+  }
+
+  .cropEmojiBadge {
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+    border-radius: 10px;
+  }
+
+  .cropIconSvg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .siembraRubro {
+    font-size: 15px;
+  }
+
+  .loteBadge {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  .iconBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+
+  .cropStatsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    padding: 12px 6px;
+    gap: 8px;
+  }
+
+  .statItem:not(:last-child) {
+    border-right: none;
+  }
+
+  .statValue {
+    font-size: 12px;
+  }
+
+  .waterVal {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .statLabel {
+    font-size: 8px;
+  }
+
+  .progressSection {
+    padding: 4px 6px;
+  }
+
+  .progressPercentage {
+    font-size: 11px;
+  }
+
+  .taskSummaryText {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .progressBar {
+    height: 6px;
+  }
+
+  .dateIcon {
+    font-size: 14px;
+  }
+
+  .dateTitle {
+    font-size: 8px;
+  }
+
+  .dateVal {
+    font-size: 11px;
+  }
+
+  .tasksSection {
+    padding: 14px 6px 4px 6px;
+    gap: 12px;
+  }
+
+  .tasksTitle {
+    font-size: 11px;
+  }
+
+  .addTaskBtn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .tareasList {
+    max-height: 220px;
+  }
+
+  .tareaItem {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .customCheckbox {
+    height: 18px;
+    width: 18px;
+  }
+
+  .customCheckbox::after {
+    left: 5px;
+    top: 1px;
+    width: 4px;
+    height: 9px;
+  }
+
+  .tareaName {
+    font-size: 12px;
+  }
+
+  .tareaDate {
+    font-size: 10px;
+  }
+
+  .tareaTypeBadge {
+    font-size: 8px;
+    padding: 1px 5px;
+  }
+
+  .deleteTaskBtn {
+    font-size: 16px;
+  }
+
+  .modal {
+    padding: 24px;
+    margin: 16px;
+    max-width: 95%;
+    border-radius: 24px;
+  }
+
+  .modalLarge {
+    max-width: 95%;
+    max-height: 85vh;
+  }
+
+  .modalHeader {
+    padding: 20px 24px;
+  }
+
+  .modalTitle {
+    font-size: 18px;
+  }
+
+  .modalCloseBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+
+  .modalForm {
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .modalForm label {
+    font-size: 11px;
+  }
+
+  .modalForm input {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .modalSelect {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .confirmBtn {
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  .mapSection {
+    height: 400px;
+    border-radius: 24px;
+  }
+
+  .loadingState,
+  .emptyState {
+    padding: 60px 24px;
+    border-radius: 24px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Móviles pequeños (< 480px) */
+@media (max-width: 480px) {
+  .wrapper {
+    padding: 16px 12px;
+  }
+
+  .pageTitle {
+    font-size: 20px;
+  }
+
+  .pageHeader {
+    margin-bottom: 20px;
+  }
+
+  .filtroSelect {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .nuevaSiembraBtn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .tabs {
+    padding: 4px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 10px;
+  }
+
+  .catalogGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .catalogCard {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .catalogEmoji {
+    font-size: 26px;
+  }
+
+  .catalogName {
+    font-size: 16px;
+  }
+
+  .alertaText {
+    font-size: 11px;
+    padding: 8px;
+  }
+
+  .siembrasGrid {
+    gap: 14px;
+  }
+
+  .siembraCard {
+    padding: 14px;
+    border-radius: 14px;
+    gap: 12px;
+  }
+
+  .siembraHeader {
+    padding-left: 4px;
+  }
+
+  .siembraTitleGroup {
+    gap: 10px;
+  }
+
+  .cropEmojiBadge {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+
+  .cropIconSvg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .siembraRubro {
+    font-size: 14px;
+  }
+
+  .loteBadge {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  .iconBtn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+
+  .cropStatsGrid {
+    padding: 10px 4px;
+    gap: 6px;
+  }
+
+  .statValue {
+    font-size: 11px;
+  }
+
+  .waterVal {
+    font-size: 9px;
+    padding: 2px 5px;
+  }
+
+  .statLabel {
+    font-size: 7px;
+  }
+
+  .progressSection {
+    padding: 4px 4px;
+  }
+
+  .progressPercentage {
+    font-size: 10px;
+  }
+
+  .taskSummaryText {
+    font-size: 9px;
+    padding: 2px 5px;
+  }
+
+  .progressBar {
+    height: 5px;
+  }
+
+  .dateIcon {
+    font-size: 12px;
+  }
+
+  .dateTitle {
+    font-size: 7px;
+  }
+
+  .dateVal {
+    font-size: 10px;
+  }
+
+  .tasksSection {
+    padding: 12px 4px 4px 4px;
+    gap: 10px;
+  }
+
+  .tasksTitle {
+    font-size: 10px;
+  }
+
+  .addTaskBtn {
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+
+  .tareasList {
+    max-height: 200px;
+  }
+
+  .tareaItem {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .customCheckbox {
+    height: 16px;
+    width: 16px;
+  }
+
+  .customCheckbox::after {
+    left: 4px;
+    top: 0px;
+    width: 3px;
+    height: 8px;
+  }
+
+  .tareaName {
+    font-size: 11px;
+  }
+
+  .tareaDate {
+    font-size: 9px;
+  }
+
+  .tareaTypeBadge {
+    font-size: 7px;
+    padding: 1px 4px;
+  }
+
+  .deleteTaskBtn {
+    font-size: 14px;
+  }
+
+  .modal {
+    padding: 20px;
+    margin: 12px;
+    border-radius: 20px;
+  }
+
+  .modalLarge {
+    max-height: 80vh;
+  }
+
+  .modalHeader {
+    padding: 16px 20px;
+  }
+
+  .modalTitle {
+    font-size: 16px;
+  }
+
+  .modalCloseBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+  }
+
+  .modalForm {
+    gap: 14px;
+    margin-top: 20px;
+  }
+
+  .modalForm label {
+    font-size: 10px;
+  }
+
+  .modalForm input {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .modalSelect {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .confirmBtn {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .mapSection {
+    height: 350px;
+    border-radius: 20px;
+  }
+
+  .loadingState,
+  .emptyState {
+    padding: 48px 20px;
+    border-radius: 20px;
+  }
+
+  .spinner {
+    width: 36px;
+    height: 36px;
   }
 }

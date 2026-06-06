@@ -14,10 +14,24 @@ export const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+let app = null;
+let analytics = null;
+let db = null;
+let auth = null;
+let firebaseError = null;
 
+if (!firebaseConfig.apiKey) {
+  firebaseError = "Faltan las variables de entorno de Firebase. VITE_FIREBASE_API_KEY no está definido.";
+} else {
+  try {
+    app = initializeApp(firebaseConfig);
+    analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+    db = getFirestore(app);
+    auth = getAuth(app);
+  } catch (error) {
+    firebaseError = error.message || "Error desconocido al inicializar Firebase";
+  }
+}
+
+export { app, analytics, db, auth, firebaseError };
 export default app;

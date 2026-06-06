@@ -34,21 +34,41 @@
   flex-direction: column;
 }
 
+/* ── Donut Card ─────────────────────────────── */
 .donutCard {
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(255, 255, 255, 0.97);
   border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--gray-200);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+  border: 1px solid var(--gray-200, #e5e7eb);
   padding: 24px;
   display: flex;
   flex-direction: column;
+  gap: 0;
+}
+
+.donutCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.donutBadge {
+  font-size: 12px;
+  font-weight: 700;
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  border-radius: 20px;
+  padding: 4px 12px;
+  white-space: nowrap;
 }
 
 .cardTitle {
   font-size: 16px;
   font-weight: 800;
   color: #111827;
-  margin-bottom: 24px;
+  margin: 0;
 }
 
 .donutContent {
@@ -56,18 +76,21 @@
   align-items: center;
   justify-content: space-around;
   flex: 1;
+  gap: 16px;
 }
 
 .donutChartContainer {
   position: relative;
-  width: 160px;
-  height: 160px;
+  width: 170px;
+  height: 170px;
+  flex-shrink: 0;
 }
 
 .donutSvg {
   width: 100%;
   height: 100%;
   transform: rotate(-90deg);
+  overflow: visible;
 }
 
 .donutCenter {
@@ -76,49 +99,206 @@
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  pointer-events: none;
+  transition: all 0.2s ease;
 }
 
 .donutValueTotal {
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 24px;
+  font-weight: 900;
   color: #111827;
+  line-height: 1;
 }
 
+.donutCenterUnit {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.donutCenterSvg {
+  width: 44px;
+  height: 44px;
+  animation: popIn 0.2s ease;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.12));
+}
+
+.donutCenterPct {
+  font-size: 20px;
+  font-weight: 900;
+  color: #111827;
+  line-height: 1;
+  animation: popIn 0.2s ease;
+}
+
+.donutCenterSub {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  animation: popIn 0.2s ease;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Leyenda ─────────────────────────────────── */
 .donutLegend {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-width: 150px;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
 }
 
 .legendHeader {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  color: #6b7280;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 4px;
-  margin-bottom: 4px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 6px;
+  margin-bottom: 2px;
 }
 
 .legendRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 7px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.legendRow:hover,
+.legendRowActive {
+  background: #f9fafb;
+  transform: translateX(2px);
+}
+
+.legendRowDimmed {
+  opacity: 0.4;
 }
 
 .lCropName {
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
   font-weight: 600;
   color: #374151;
 }
 
+.lDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.lCropSvg {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.1));
+}
+
+.tooltipSvg {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.lRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
 .lCropVal {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   color: #111827;
 }
+
+.lCropPct {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9ca3af;
+}
+
+/* ── Barra proporcional ─────────────────────── */
+.donutBarRow {
+  display: flex;
+  height: 7px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 20px;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.donutBar {
+  border-radius: 10px;
+  transition: opacity 0.2s ease, flex 0.3s ease;
+}
+
+/* ── Tooltip flotante ───────────────────────── */
+.donutTooltip {
+  position: fixed;
+  z-index: 9999;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.1);
+  padding: 12px 16px;
+  pointer-events: none;
+  min-width: 160px;
+  border: 1px solid #f3f4f6;
+  animation: fadeInTooltip 0.15s ease;
+}
+
+@keyframes fadeInTooltip {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tooltipHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid;
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #6b7280;
+  padding: 3px 0;
+}
+
+.tooltipRow strong {
+  color: #111827;
+  font-weight: 800;
+}
+
 
 /* Row 2 */
 .rowMiddle {
@@ -183,7 +363,7 @@
   padding: 8px;
   background-color: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
 .sCropIcon {
@@ -331,7 +511,10 @@
 .laurelWreath::before {
   content: "";
   position: absolute;
-  top: -10px; left: -20px; right: -20px; bottom: -10px;
+  top: -10px;
+  left: -20px;
+  right: -20px;
+  bottom: -10px;
   background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M20,80 Q10,50 30,20 Q50,0 50,20 Q40,50 50,80 Z" fill="none" stroke="%233f6212" stroke-width="2"/><path d="M80,80 Q90,50 70,20 Q50,0 50,20 Q60,50 50,80 Z" fill="none" stroke="%233f6212" stroke-width="2"/></svg>');
   background-size: contain;
   background-repeat: no-repeat;
@@ -382,25 +565,102 @@
   border-bottom: 1px dashed #e5e7eb;
 }
 
+* {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* 2. Ajuste del Navbar (Asumiendo una clase .navButton o similar) */
+/* Aplica esto a tus botones del menú superior */
+.navButton,
+.navItem {
+  padding: 8px 16px;
+  font-size: clamp(12px, 2vw, 14px);
+  /* Se achica según el tamaño de pantalla */
+  white-space: nowrap;
+  /* Evita que el texto se rompa en dos líneas */
+}
+
+/* 3. Ajuste específico para tarjetas de datos (Lluvia y Hectáreas) */
+/* Esto evita que se rompan cuando el espacio es muy estrecho */
+.weatherWrapper,
+.estCard {
+  min-width: 0;
+  /* Vital para que el flex/grid no fuerce el ancho hacia afuera */
+  width: 100%;
+}
+
+/* 4. Sistema de Media Queries para Tablets y Móviles */
 @media (max-width: 1024px) {
-  .rowTop, .rowBottom {
-    grid-template-columns: 1fr;
+
+  /* En tablets, reducimos un poco los márgenes internos para ganar espacio */
+  .dashboard {
+    padding: 20px;
   }
-  .chartCardsRow {
-    grid-template-columns: repeat(2, 1fr);
+
+  .rowTop,
+  .rowBottom {
+    grid-template-columns: 1fr;
+    /* Columna única */
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+
+  /* Ajuste para que las tarjetas de métricas no se vean gigantes */
+  .estNum {
+    font-size: 28px !important;
+  }
+
+  .cardTitle {
+    font-size: 14px;
+  }
+
+  /* Asegura que la lista dentro de tarjetas logísticas se mantenga legible */
+  .logList li {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* En móviles, maximizamos el espacio */
+  .dashboard {
+    padding: 12px;
+    gap: 16px;
+  }
+
+  /* Los botones del navbar se vuelven más compactos */
+  .navButton {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  /* Tarjetas pequeñas: apilado total */
   .chartCardsRow {
     grid-template-columns: 1fr;
   }
+
+  /* Gráficos: reducimos el contenedor para que quepa en pantalla */
+  .donutChartContainer {
+    width: 100px;
+    height: 100px;
+  }
+
+  .donutValueTotal {
+    font-size: 16px;
+  }
+
+  /* Ajuste del contenido de la tarjeta de hectáreas */
   .estContent {
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
   }
-  .donutContent {
-    flex-direction: column;
-    gap: 24px;
-  }
+}
+
+/* 5. Asegurar que los íconos no se deformen nunca */
+.sCropIcon,
+.estCenter {
+  flex-shrink: 0;
+  /* Evita que el icono se achique más de lo necesario */
 }

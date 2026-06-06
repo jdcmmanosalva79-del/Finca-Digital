@@ -37,9 +37,11 @@
 }
 
 .tableContainer {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+  backdrop-filter: blur(12px);
+  border-radius: 24px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.6);
   overflow: hidden;
 }
 
@@ -187,21 +189,27 @@
 }
 
 .createBtn {
-  background: var(--teal);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 14px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 10px rgba(42, 125, 111, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .createBtn:hover {
-  background: #206256;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(42, 125, 111, 0.3);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.createBtn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .modalOverlay {
@@ -320,20 +328,28 @@
 }
 
 .deleteBtn {
-  background: #fee2e2;
+  background: white;
   color: #dc2626;
-  border: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  border: 2px solid rgba(220, 38, 38, 0.2);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .deleteBtn:hover {
-  background: #fecaca;
-  transform: scale(1.05);
+  background: #dc2626;
+  color: white;
+  border-color: #dc2626;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.deleteBtn:active {
+  transform: translateY(0) scale(1);
 }

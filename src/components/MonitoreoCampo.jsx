@@ -1,437 +1,598 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { collection, addDoc, serverTimestamp, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAppContext } from '../context/AppContext';
 import styles from './MonitoreoCampo.module.css';
 
+/* ── Constantes ─────────────────────────────── */
 const STATUS_OPTIONS = [
-  { id: 'saludable', label: 'Saludable', icon: '🟢', class: 'statusSaludable' },
-  { id: 'peste', label: 'Peste / Plaga', icon: '🔴', class: 'statusPeste' },
-  { id: 'deficiencia', label: 'Def. Nutrientes', icon: '🟡', class: 'statusDeficiencia' },
-  { id: 'crecimiento', label: 'Crecimiento Óptimo', icon: '🔵', class: 'statusCrecimiento' },
+  {
+    id: 'saludable',
+    label: 'Saludable',
+    sub: 'Sin anomalías detectadas',
+    color: '#16a34a',
+    bg: '#f0fdf4',
+    border: '#86efac',
+    dot: '#22c55e',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" fill="#dcfce7"/>
+        <path d="M8 12l3 3 5-6" stroke="#16a34a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'peste',
+    label: 'Plaga / Enfermedad',
+    sub: 'Requiere intervención urgente',
+    color: '#dc2626',
+    bg: '#fef2f2',
+    border: '#fca5a5',
+    dot: '#ef4444',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" fill="#fee2e2"/>
+        <path d="M12 8v4m0 4h.01" stroke="#dc2626" strokeWidth="2.2" strokeLinecap="round"/>
+        <circle cx="12" cy="16" r="1" fill="#dc2626"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'deficiencia',
+    label: 'Def. Nutrientes',
+    sub: 'Aplicar fertilizante',
+    color: '#d97706',
+    bg: '#fffbeb',
+    border: '#fcd34d',
+    dot: '#f59e0b',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" fill="#fef3c7"/>
+        <path d="M12 7v5l3 3" stroke="#d97706" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'crecimiento',
+    label: 'Crecimiento Óptimo',
+    sub: 'Desarrollo superior al promedio',
+    color: '#2563eb',
+    bg: '#eff6ff',
+    border: '#93c5fd',
+    dot: '#3b82f6',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" fill="#dbeafe"/>
+        <path d="M7 17l3-4 3 2 4-6" stroke="#2563eb" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
 ];
+
+/* ── Icono de lote ──────────────────────────── */
+function LoteIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
 
 export default function MonitoreoCampo() {
   const { data, showAlert, hideAlert } = useAppContext();
-  const isAdmin = data?.user?.rol === 'admin' || data?.user?.rol === 'Gerencia';
-  const [activeTab, setActiveTab] = useState('registro'); // 'registro' | 'historial'
-  
-  const [loteId, setLoteId] = useState('');
-  const [estado, setEstado] = useState('');
-  const [observaciones, setObservaciones] = useState('');
-  const [foto, setFoto] = useState(null);
-  const [preview, setPreview] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [historial, setHistorial] = useState([]);
-  const [tareasPendientes, setTareasPendientes] = useState([]);
-  const [inventario, setInventario] = useState([]);
-  
-  const [tareaId, setTareaId] = useState('');
-  const [usaInsumos, setUsaInsumos] = useState(false);
-  const [insumoId, setInsumoId] = useState('');
-  const [cantidadInsumo, setCantidadInsumo] = useState('');
+  const isAdmin = data?.user?.rol === 'admin' || data?.user?.rol === 'Gerencia' || data?.user?.rol === 'Administrador';
+  const [activeTab, setActiveTab] = useState('registro');
+  const [isDragging, setIsDragging] = useState(false);
 
-  // Generamos una lista de lotes activos basados en el contexto
-  const activeLotes = [
-    { id: 'lote_cacao_1', name: 'Lote Cacao Norte', tipo: 'cacao' },
-    { id: 'lote_maiz_1', name: 'Lote Maíz Principal', tipo: 'maiz' },
-    { id: 'lote_platano_1', name: 'Lote Plátano Sur', tipo: 'platano' },
-  ];
+  const [loteId, setLoteId]           = useState('');
+  const [estado, setEstado]           = useState('');
+  const [observaciones, setObservaciones] = useState('');
+  const [foto, setFoto]               = useState(null);
+  const [preview, setPreview]         = useState('');
+  const [loading, setLoading]         = useState(false);
+  const [success, setSuccess]         = useState(false);
+  const [historial, setHistorial]     = useState([]);
+  const [tareasPendientes, setTareasPendientes] = useState([]);
+  const [inventario, setInventario]   = useState([]);
+  const [tareaId, setTareaId]         = useState('');
+  const [usaInsumos, setUsaInsumos]   = useState(false);
+  const [insumoId, setInsumoId]       = useState('');
+  const [cantidadInsumo, setCantidadInsumo] = useState('');
+  const [filterEstado, setFilterEstado] = useState('todos');
+  const dropRef = useRef(null);
+
+  // Lotes desde cultivos activos del contexto
+  const activeLotes = (data.activeCrops || []).length > 0
+    ? (data.activeCrops || []).map(c => ({
+        id: c.id,
+        name: `Lote ${c.lote} — ${c.rubro}`,
+        tipo: c.rubro,
+      }))
+    : [
+        { id: 'lote_cacao_1',   name: 'Lote Cacao Norte',    tipo: 'cacao' },
+        { id: 'lote_maiz_1',    name: 'Lote Maíz Principal', tipo: 'maiz' },
+        { id: 'lote_platano_1', name: 'Lote Plátano Sur',    tipo: 'platano' },
+      ];
 
   useEffect(() => {
-    // Escuchar historial de monitoreos
     const qMon = query(collection(db, 'monitoreos'), orderBy('timestamp', 'desc'));
-    const unsubMon = onSnapshot(qMon, (snap) => {
-      setHistorial(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    });
-
-    // Escuchar tareas pendientes
+    const unsubMon = onSnapshot(qMon, snap =>
+      setHistorial(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    );
     const qTar = query(collection(db, 'tareas'), orderBy('timestamp', 'desc'));
-    const unsubTar = onSnapshot(qTar, (snap) => {
-      setTareasPendientes(snap.docs.filter(d => d.data().status === 'pendiente').map(doc => ({ id: doc.id, ...doc.data() })));
-    });
-
-    // Escuchar inventario (para descontar insumos)
+    const unsubTar = onSnapshot(qTar, snap =>
+      setTareasPendientes(snap.docs.filter(d => d.data().status === 'pendiente').map(d => ({ id: d.id, ...d.data() })))
+    );
     const qInv = query(collection(db, 'inventario'), orderBy('nombre', 'asc'));
-    const unsubInv = onSnapshot(qInv, (snap) => {
-      setInventario(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    });
-
-    return () => {
-      unsubMon();
-      unsubTar();
-      unsubInv();
-    };
+    const unsubInv = onSnapshot(qInv, snap =>
+      setInventario(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    );
+    return () => { unsubMon(); unsubTar(); unsubInv(); };
   }, []);
 
-  const handleFotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFoto(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+  const applyFile = (file) => {
+    if (!file || !file.type.startsWith('image/')) return;
+    setFoto(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setPreview(reader.result);
+    reader.readAsDataURL(file);
   };
 
-  const removeFoto = () => {
-    setFoto(null);
-    setPreview('');
+  const handleFotoChange = e => applyFile(e.target.files[0]);
+
+  const handleDrop = e => {
+    e.preventDefault();
+    setIsDragging(false);
+    applyFile(e.dataTransfer.files[0]);
   };
 
-  const handleSubmit = async (e) => {
+  const removeFoto = () => { setFoto(null); setPreview(''); };
+
+  const resetForm = () => {
+    setLoteId(''); setEstado(''); setObservaciones('');
+    setTareaId(''); setUsaInsumos(false); setInsumoId('');
+    setCantidadInsumo(''); removeFoto(); setSuccess(false);
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
     if (!loteId || !estado || !foto) {
-      showAlert({
-        type: 'warning',
-        title: 'Datos incompletos',
-        message: 'Por favor selecciona el lote, el estado y sube una foto de evidencia.',
-        confirmText: 'Entendido'
-      });
+      showAlert({ type: 'warning', title: 'Datos incompletos', message: 'Selecciona el lote, el estado y sube una foto de evidencia.', confirmText: 'Entendido' });
       return;
     }
-
     setLoading(true);
     try {
-      // 1. Simular carga de foto a Firebase Storage (o Cloudinary)
-      // En un flujo real: const photoUrl = await uploadBytes(ref, foto);
-      const fakePhotoUrl = preview; // Usando Data URI por ahora
-
-      // 2. Guardar registro en Firestore
       await addDoc(collection(db, 'monitoreos'), {
-        loteId,
-        estado,
-        observaciones,
-        fotoUrl: fakePhotoUrl,
-        encargado: data.user.nombre,
-        encargadoEmail: data.user.email,
+        loteId, estado, observaciones, fotoUrl: preview,
+        encargado: data.user.nombre, encargadoEmail: data.user.email,
         tareaId: tareaId || null,
         insumosUsados: usaInsumos ? { id: insumoId, cantidad: Number(cantidadInsumo) } : null,
         timestamp: serverTimestamp()
       });
-
-      // 3. Si hay tarea asociada, marcarla como completada
       if (tareaId) {
-        await updateDoc(doc(db, 'tareas', tareaId), {
-          status: 'completada',
-          completadaPor: data.user.nombre,
-          fechaCompletada: serverTimestamp()
-        });
+        await updateDoc(doc(db, 'tareas', tareaId), { status: 'completada', completadaPor: data.user.nombre, fechaCompletada: serverTimestamp() });
       }
-
-      // 4. Si usó insumos, descontar del inventario
       if (usaInsumos && insumoId && cantidadInsumo) {
-        const itemInv = inventario.find(i => i.id === insumoId);
-        if (itemInv) {
-          await updateDoc(doc(db, 'inventario', insumoId), {
-            cantidad: itemInv.cantidad - Number(cantidadInsumo),
-            ultimaSalida: serverTimestamp()
-          });
-        }
+        const item = inventario.find(i => i.id === insumoId);
+        if (item) await updateDoc(doc(db, 'inventario', insumoId), { cantidad: item.cantidad - Number(cantidadInsumo), ultimaSalida: serverTimestamp() });
       }
-
       setSuccess(true);
-      // Reset form
-      setTimeout(() => {
-        setLoteId('');
-        setEstado('');
-        setObservaciones('');
-        setTareaId('');
-        setUsaInsumos(false);
-        setInsumoId('');
-        setCantidadInsumo('');
-        removeFoto();
-        setSuccess(false);
-      }, 3000);
-
-    } catch (error) {
-      console.error("Error al guardar monitoreo:", error);
-      showAlert({
-        type: 'error',
-        title: 'Error de Guardado',
-        message: 'Hubo un error al intentar guardar el registro fotográfico.',
-        confirmText: 'Cerrar'
-      });
+      setTimeout(resetForm, 2800);
+    } catch (err) {
+      showAlert({ type: 'error', title: 'Error de Guardado', message: 'No se pudo guardar el registro.', confirmText: 'Cerrar' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = id => {
     showAlert({
-      type: 'confirm',
-      title: 'Marcar como Solucionado',
-      message: '¿Estás seguro que deseas marcar este reporte como solucionado y eliminarlo del historial?',
-      confirmText: 'Sí, Solucionado',
-      cancelText: 'Cancelar',
+      type: 'confirm', title: 'Marcar como Solucionado',
+      message: '¿Confirmas que este reporte fue atendido y puede archivarse?',
+      confirmText: 'Sí, Solucionado', cancelText: 'Cancelar',
       onConfirm: async () => {
         hideAlert();
         try {
           await deleteDoc(doc(db, 'monitoreos', id));
-          showAlert({
-            type: 'success',
-            title: 'Reporte Solucionado',
-            message: 'El monitoreo ha sido archivado exitosamente.',
-            confirmText: 'Ok'
-          });
-        } catch (error) {
-          console.error("Error al eliminar:", error);
-          showAlert({ type: 'error', title: 'Error', message: 'No se pudo eliminar el reporte.' });
-        }
+          showAlert({ type: 'success', title: 'Archivado', message: 'Reporte marcado como solucionado.', confirmText: 'Ok' });
+        } catch { showAlert({ type: 'error', title: 'Error', message: 'No se pudo eliminar.', confirmText: 'Ok' }); }
       }
     });
   };
 
-  const handleMarcarVisto = async (id) => {
-    try {
-      await updateDoc(doc(db, 'monitoreos', id), {
-        vistoPor: arrayUnion(data.user.nombre)
-      });
-    } catch (error) {
-      console.error("Error al marcar como visto:", error);
-    }
+  const handleMarcarVisto = async id => {
+    try { await updateDoc(doc(db, 'monitoreos', id), { vistoPor: arrayUnion(data.user.nombre) }); } catch {}
   };
 
+  // Estadísticas rápidas
+  const totalReportes = historial.length;
+  const alertas = historial.filter(h => h.estado === 'peste' || h.estado === 'deficiencia').length;
+  const saludables = historial.filter(h => h.estado === 'saludable').length;
+  const pendientesVisto = historial.filter(h => !h.vistoPor || !h.vistoPor.includes(data.user?.nombre)).length;
+
+  const historialFiltrado = filterEstado === 'todos' ? historial : historial.filter(h => h.estado === filterEstado);
+
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div>
-          <h2 className={styles.title}>Monitoreo en Campo</h2>
-          <p className={styles.subtitle}>Registro fotográfico (Foto-Control) y estado visual de las plantas.</p>
+    <div className={styles.page}>
+
+      {/* ── Page Header ─────────────────── */}
+      <div className={styles.pageHeader}>
+        <div className={styles.pageHeaderLeft}>
+          <div className={styles.headerIcon}>
+            <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="currentColor"/>
+            </svg>
+          </div>
+          <div>
+            <h1 className={styles.pageTitle}>Monitoreo en Campo</h1>
+            <p className={styles.pageSubtitle}>Registro Foto-Control · Estado visual de cultivos · La Yuca, Barinas</p>
+          </div>
+        </div>
+
+        {/* KPI chips */}
+        <div className={styles.kpiRow}>
+          <div className={styles.kpi}>
+            <span className={styles.kpiVal}>{totalReportes}</span>
+            <span className={styles.kpiLbl}>Reportes</span>
+          </div>
+          <div className={`${styles.kpi} ${styles.kpiAlert}`}>
+            <span className={styles.kpiVal}>{alertas}</span>
+            <span className={styles.kpiLbl}>Alertas</span>
+          </div>
+          <div className={`${styles.kpi} ${styles.kpiGreen}`}>
+            <span className={styles.kpiVal}>{saludables}</span>
+            <span className={styles.kpiLbl}>Saludables</span>
+          </div>
+          {pendientesVisto > 0 && (
+            <div className={`${styles.kpi} ${styles.kpiBadge}`}>
+              <span className={styles.kpiVal}>{pendientesVisto}</span>
+              <span className={styles.kpiLbl}>Sin ver</span>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className={styles.tabs}>
-        <button 
-          className={`${styles.tabBtn} ${activeTab === 'registro' ? styles.tabBtnActive : ''}`}
+      {/* ── Tabs ────────────────────────── */}
+      <div className={styles.tabBar}>
+        <button
+          className={`${styles.tabBtn} ${activeTab === 'registro' ? styles.tabActive : ''}`}
           onClick={() => setActiveTab('registro')}
         >
-          📝 Subir Monitoreo
+          <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+            <path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Nuevo Reporte
         </button>
-        <button 
-          className={`${styles.tabBtn} ${activeTab === 'historial' ? styles.tabBtnActive : ''}`}
+        <button
+          className={`${styles.tabBtn} ${activeTab === 'historial' ? styles.tabActive : ''}`}
           onClick={() => setActiveTab('historial')}
         >
-          📷 Historial Fotográfico {isAdmin ? '(Admin View)' : ''}
+          <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+            <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
+            <path d="M3 9h18M9 21V9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+          Historial
+          {historial.length > 0 && <span className={styles.tabCount}>{historial.length}</span>}
         </button>
       </div>
 
+      {/* ══ TAB: REGISTRO ═══════════════ */}
       {activeTab === 'registro' && (
-        <form className={styles.formCard} onSubmit={handleSubmit}>
-          
-          {/* Tarea Asociada */}
-          <div className={styles.formGroup}>
-            <label className={styles.label}>¿Es parte de una Tarea Asignada? (Opcional)</label>
-            <select 
-              className={styles.select}
-              value={tareaId}
-              onChange={(e) => {
-                setTareaId(e.target.value);
-                // Auto-seleccionar el lote si la tarea lo tiene
-                const task = tareasPendientes.find(t => t.id === e.target.value);
-                if (task) setLoteId(task.lote);
-              }}
-            >
-              <option value="">-- No, registro espontáneo --</option>
-              {tareasPendientes.map(tarea => (
-                <option key={tarea.id} value={tarea.id}>
-                  📌 {tarea.tipo} - {tarea.lote} (Asignado por: {tarea.creadoPor})
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className={styles.formLayout}>
+          <form className={styles.formCard} onSubmit={handleSubmit}>
 
-          {/* Lote Selection */}
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Selecciona el Lote o Sector</label>
-            <select 
-              className={styles.select}
-              value={loteId}
-              onChange={(e) => setLoteId(e.target.value)}
-              required
-            >
-              <option value="">-- Elige un lote --</option>
-              {activeLotes.map(lote => (
-                <option key={lote.id} value={lote.id}>
-                  {lote.name} ({lote.tipo})
-                </option>
-              ))}
-            </select>
-          </div>
+            {/* Sección 1: Tarea + Lote */}
+            <div className={styles.sectionBlock}>
+              <div className={styles.sectionTitle}>
+                <span className={styles.sectionNum}>1</span>
+                Ubicación y Contexto
+              </div>
+              <div className={styles.fieldGroup}>
+                <div className={styles.fieldWrapper}>
+                  <label className={styles.fieldLabel}>Tarea Asignada (Opcional)</label>
+                  <div className={styles.selectWrapper}>
+                    <svg className={styles.selectIcon} viewBox="0 0 24 24" fill="none" width="16" height="16">
+                      <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <select className={styles.select} value={tareaId} onChange={e => { setTareaId(e.target.value); const t = tareasPendientes.find(t => t.id === e.target.value); if (t) setLoteId(t.lote); }}>
+                      <option value="">— Registro espontáneo —</option>
+                      {tareasPendientes.map(t => (
+                        <option key={t.id} value={t.id}>📌 {t.tipo} — {t.lote} ({t.creadoPor})</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
-          {/* Insumos Logic */}
-          <div className={styles.formGroup}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <input 
-                type="checkbox" 
-                id="usaInsumos" 
-                checked={usaInsumos} 
-                onChange={e => setUsaInsumos(e.target.checked)} 
-                style={{ width: '18px', height: '18px' }}
-              />
-              <label htmlFor="usaInsumos" className={styles.label} style={{ margin: 0 }}>¿Utilizaste insumos del inventario?</label>
+                <div className={styles.fieldWrapper}>
+                  <label className={styles.fieldLabel}>Lote / Sector <span className={styles.required}>*</span></label>
+                  <div className={styles.selectWrapper}>
+                    <span className={styles.selectIcon} style={{display:'flex',alignItems:'center',color:'#6b7280'}}><LoteIcon /></span>
+                    <select className={styles.select} value={loteId} onChange={e => setLoteId(e.target.value)} required>
+                      <option value="">— Seleccionar lote —</option>
+                      {activeLotes.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {usaInsumos && (
-              <div className={styles.insumosBox}>
-                <div className={styles.formRow}>
-                  <select 
-                    className={styles.select} 
-                    value={insumoId} 
-                    onChange={e => setInsumoId(e.target.value)}
-                    required={usaInsumos}
+            {/* Sección 2: Estado visual */}
+            <div className={styles.sectionBlock}>
+              <div className={styles.sectionTitle}>
+                <span className={styles.sectionNum}>2</span>
+                Estado Visual de la Planta <span className={styles.required}>*</span>
+              </div>
+              <div className={styles.statusGrid}>
+                {STATUS_OPTIONS.map(opt => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    className={`${styles.statusCard} ${estado === opt.id ? styles.statusCardActive : ''}`}
+                    style={estado === opt.id ? { '--sc-color': opt.color, '--sc-bg': opt.bg, '--sc-border': opt.border } : {}}
+                    onClick={() => setEstado(opt.id)}
                   >
-                    <option value="">-- Selecciona el Insumo --</option>
-                    {inventario.map(item => (
-                      <option key={item.id} value={item.id}>
-                        {item.nombre} ({item.cantidad} {item.unidad} disp.)
-                      </option>
-                    ))}
-                  </select>
-                  <input 
-                    type="number" 
-                    className={styles.input} 
-                    placeholder="Cant." 
-                    value={cantidadInsumo}
-                    onChange={e => setCantidadInsumo(e.target.value)}
-                    required={usaInsumos}
-                    style={{ width: '100px' }}
-                  />
-                </div>
+                    <div className={styles.statusIconWrap}>{opt.icon}</div>
+                    <div className={styles.statusInfo}>
+                      <span className={styles.statusLabel}>{opt.label}</span>
+                      <span className={styles.statusSub}>{opt.sub}</span>
+                    </div>
+                    {estado === opt.id && (
+                      <div className={styles.statusCheck}>
+                        <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+                          <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    )}
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
-
-          {/* Estado Visual Selection */}
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Estado Visual de la Planta</label>
-            <div className={styles.statusGrid}>
-              {STATUS_OPTIONS.map(opt => (
-                <div 
-                  key={opt.id}
-                  className={`${styles.statusCard} ${estado === opt.id ? styles.active : ''} ${styles[opt.class]}`}
-                  onClick={() => setEstado(opt.id)}
-                >
-                  <span className={styles.statusIcon}>{opt.icon}</span>
-                  <span className={styles.statusName}>{opt.label}</span>
-                </div>
-              ))}
             </div>
-          </div>
 
-          {/* Foto-Control Upload */}
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Foto-Control (Evidencia)</label>
-            {!preview ? (
-              <div className={styles.photoUploadArea}>
-                <span className={styles.uploadIcon}>📸</span>
-                <span className={styles.uploadText}>Toca para tomar una foto o subir</span>
-                <span className={styles.uploadSubtext}>Solo imágenes JPG o PNG</span>
-                <input 
-                  type="file" 
-                  accept="image/*"
-                  capture="environment"
-                  className={styles.fileInput}
-                  onChange={handleFotoChange}
-                />
+            {/* Sección 3: Foto-Control */}
+            <div className={styles.sectionBlock}>
+              <div className={styles.sectionTitle}>
+                <span className={styles.sectionNum}>3</span>
+                Foto-Control (Evidencia) <span className={styles.required}>*</span>
               </div>
-            ) : (
-              <div className={styles.photoUploadArea} style={{ padding: 0 }}>
-                <img src={preview} alt="Vista previa" className={styles.previewImage} />
-                <button type="button" className={styles.removePhotoBtn} onClick={removeFoto}>
-                  ✕
-                </button>
+              {!preview ? (
+                <div
+                  ref={dropRef}
+                  className={`${styles.dropZone} ${isDragging ? styles.dropZoneActive : ''}`}
+                  onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                >
+                  <div className={styles.dropZoneInner}>
+                    <div className={styles.dropIconCircle}>
+                      <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
+                        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        <circle cx="12" cy="13" r="4" stroke="currentColor" strokeWidth="1.8"/>
+                      </svg>
+                    </div>
+                    <p className={styles.dropText}>Arrastra una foto aquí o <span className={styles.dropLink}>selecciona desde el dispositivo</span></p>
+                    <p className={styles.dropSub}>JPG, PNG · Máx 10 MB · Cámara del dispositivo compatible</p>
+                  </div>
+                  <input type="file" accept="image/*" capture="environment" className={styles.fileInput} onChange={handleFotoChange} />
+                </div>
+              ) : (
+                <div className={styles.previewWrapper}>
+                  <img src={preview} alt="Vista previa" className={styles.previewImg} />
+                  <div className={styles.previewOverlay}>
+                    <span className={styles.previewBadge}>✓ Foto cargada</span>
+                    <button type="button" className={styles.removeBtn} onClick={removeFoto}>
+                      <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+                        <path d="M18 6L6 18M6 6l12 12" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                      </svg>
+                      Quitar foto
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Sección 4: Insumos */}
+            <div className={styles.sectionBlock}>
+              <div className={styles.sectionTitle}>
+                <span className={styles.sectionNum}>4</span>
+                Insumos Utilizados
               </div>
-            )}
-          </div>
+              <label className={styles.toggleRow}>
+                <div className={`${styles.toggle} ${usaInsumos ? styles.toggleOn : ''}`} onClick={() => setUsaInsumos(p => !p)}>
+                  <div className={styles.toggleThumb} />
+                </div>
+                <span className={styles.toggleLabel}>Se utilizaron insumos del inventario en esta visita</span>
+              </label>
 
-          {/* Observaciones */}
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Novedades u Observaciones (Opcional)</label>
-            <textarea 
-              className={styles.textarea}
-              placeholder="Escribe detalles sobre la plaga, o el estado del cultivo..."
-              value={observaciones}
-              onChange={(e) => setObservaciones(e.target.value)}
-            />
-          </div>
-
-          {/* Submit */}
-          <button 
-            type="submit" 
-            className={styles.submitBtn} 
-            disabled={loading || success}
-            style={success ? { background: '#22c55e' } : {}}
-          >
-            {loading ? 'Subiendo registro...' : success ? '¡Registro Guardado! ✅' : 'Guardar Monitoreo'}
-          </button>
-
-        </form>
-      )}
-
-      {activeTab === 'historial' && (
-        <div className={styles.historyGrid}>
-          {historial.length === 0 ? (
-            <p style={{ color: 'var(--gray-500)' }}>No hay reportes de monitoreo aún.</p>
-          ) : (
-            historial.map(item => {
-              const statusOpt = STATUS_OPTIONS.find(s => s.id === item.estado);
-              const loteName = activeLotes.find(l => l.id === item.loteId)?.name || item.loteId;
-              const dateStr = item.timestamp?.toDate ? item.timestamp.toDate().toLocaleString('es-VE') : 'Reciente';
-              
-              return (
-                <div key={item.id} className={styles.historyCard}>
-                  {item.fotoUrl && (
-                    <img src={item.fotoUrl} alt="Evidencia" className={styles.historyPhoto} />
-                  )}
-                  <div className={styles.historyContent}>
-                    <div className={styles.historyHeader}>
-                      <h3 className={styles.historyLote}>{loteName}</h3>
-                      <span className={styles.historyDate}>{dateStr}</span>
+              {usaInsumos && (
+                <div className={styles.insumosPanel}>
+                  <div className={styles.insumosRow}>
+                    <div style={{ flex: 1 }}>
+                      <label className={styles.fieldLabel}>Insumo</label>
+                      <select className={styles.select} value={insumoId} onChange={e => setInsumoId(e.target.value)} required={usaInsumos}>
+                        <option value="">— Seleccionar —</option>
+                        {inventario.map(item => <option key={item.id} value={item.id}>{item.nombre} ({item.cantidad} {item.unidad} disponibles)</option>)}
+                      </select>
                     </div>
-                    {statusOpt && (
-                      <span className={`${styles.historyStatus} ${styles[statusOpt.id]}`}>
-                        {statusOpt.icon} {statusOpt.label}
-                      </span>
-                    )}
-                    {item.observaciones && (
-                      <p className={styles.historyObs}>"{item.observaciones}"</p>
-                    )}
-                    <div className={styles.historyUser}>
-                      <p style={{ margin: '0 0 4px 0' }}><strong>Reportado por:</strong> {item.encargado}</p>
-                      {item.vistoPor && item.vistoPor.length > 0 && (
-                        <p style={{ margin: '0', color: 'var(--teal-dark)' }}>
-                          <strong>Visto por:</strong> {item.vistoPor.join(', ')}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div className={styles.cardActions} style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                      {(!item.vistoPor || !item.vistoPor.includes(data.user.nombre)) && (
-                        <button 
-                          onClick={() => handleMarcarVisto(item.id)}
-                          style={{ flex: 1, padding: '6px', fontSize: '12px', background: 'var(--gray-100)', border: '1px solid var(--gray-300)', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
-                        >
-                          👁️ Marcar Visto
-                        </button>
-                      )}
-                      
-                      {(isAdmin || data.user.email === item.encargadoEmail) && (
-                        <button 
-                          onClick={() => handleDelete(item.id)}
-                          style={{ flex: 1, padding: '6px', fontSize: '12px', background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
-                        >
-                          ✔️ Solucionado (Borrar)
-                        </button>
-                      )}
+                    <div style={{ width: '120px' }}>
+                      <label className={styles.fieldLabel}>Cantidad</label>
+                      <input type="number" className={styles.input} placeholder="0" min="0" value={cantidadInsumo} onChange={e => setCantidadInsumo(e.target.value)} required={usaInsumos} />
                     </div>
                   </div>
                 </div>
-              );
-            })
+              )}
+            </div>
+
+            {/* Sección 5: Observaciones */}
+            <div className={styles.sectionBlock}>
+              <div className={styles.sectionTitle}>
+                <span className={styles.sectionNum}>5</span>
+                Observaciones de Campo
+              </div>
+              <textarea
+                className={styles.textarea}
+                placeholder="Describe el estado del cultivo, anomalías observadas, acciones tomadas..."
+                value={observaciones}
+                onChange={e => setObservaciones(e.target.value)}
+                rows={4}
+              />
+            </div>
+
+            {/* CTA Submit */}
+            <button type="submit" className={`${styles.submitBtn} ${success ? styles.submitSuccess : ''}`} disabled={loading || success}>
+              {loading ? (
+                <><span className={styles.spinner} /> Guardando registro...</>
+              ) : success ? (
+                <><svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg> ¡Monitoreo registrado con éxito!</>
+              ) : (
+                <><svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><polyline points="17 21 17 13 7 13 7 21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> Guardar Monitoreo</>
+              )}
+            </button>
+          </form>
+
+          {/* Panel lateral de info */}
+          <div className={styles.sidePanel}>
+            <div className={styles.sidePanelCard}>
+              <h4 className={styles.sidePanelTitle}>
+                <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/><path d="M12 8v4m0 4h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+                Protocolo de Campo
+              </h4>
+              <ul className={styles.protocolList}>
+                <li><span className={styles.protocolDot} style={{background:'#22c55e'}} />Foto en luz natural, planta centrada</li>
+                <li><span className={styles.protocolDot} style={{background:'#3b82f6'}} />Registrar antes de aplicar insumos</li>
+                <li><span className={styles.protocolDot} style={{background:'#f59e0b'}} />Plagas: foto de hoja afectada en detalle</li>
+                <li><span className={styles.protocolDot} style={{background:'#ef4444'}} />Urgencias: notificar al supervisor inmediatamente</li>
+              </ul>
+            </div>
+
+            <div className={styles.sidePanelCard}>
+              <h4 className={styles.sidePanelTitle}>
+                <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Resumen de Alertas
+              </h4>
+              {STATUS_OPTIONS.map(opt => {
+                const count = historial.filter(h => h.estado === opt.id).length;
+                return (
+                  <div key={opt.id} className={styles.alertRow}>
+                    <div className={styles.alertDot} style={{ background: opt.dot }} />
+                    <span className={styles.alertLabel}>{opt.label}</span>
+                    <span className={styles.alertCount} style={{ color: opt.color }}>{count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ TAB: HISTORIAL ══════════════ */}
+      {activeTab === 'historial' && (
+        <div className={styles.historialSection}>
+          {/* Filtros */}
+          <div className={styles.filterBar}>
+            <span className={styles.filterLabel}>Filtrar por estado:</span>
+            <div className={styles.filterBtns}>
+              {[{ id: 'todos', label: 'Todos' }, ...STATUS_OPTIONS].map(f => (
+                <button
+                  key={f.id}
+                  className={`${styles.filterBtn} ${filterEstado === f.id ? styles.filterBtnActive : ''}`}
+                  style={filterEstado === f.id && f.color ? { background: f.bg, color: f.color, borderColor: f.border } : {}}
+                  onClick={() => setFilterEstado(f.id)}
+                >
+                  {f.id !== 'todos' && <span className={styles.filterDot} style={{ background: f.dot }} />}
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {historialFiltrado.length === 0 ? (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyIcon}>
+                <svg viewBox="0 0 24 24" fill="none" width="40" height="40">
+                  <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="12" cy="13" r="4" stroke="#d1d5db" strokeWidth="1.5"/>
+                </svg>
+              </div>
+              <p className={styles.emptyText}>No hay reportes {filterEstado !== 'todos' ? `con estado "${STATUS_OPTIONS.find(s=>s.id===filterEstado)?.label}"` : 'aún'}.</p>
+            </div>
+          ) : (
+            <div className={styles.historyGrid}>
+              {historialFiltrado.map((item, idx) => {
+                const statusOpt  = STATUS_OPTIONS.find(s => s.id === item.estado);
+                const loteName   = activeLotes.find(l => l.id === item.loteId)?.name || item.loteId;
+                const dateStr    = item.timestamp?.toDate ? item.timestamp.toDate().toLocaleString('es-VE', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : 'Reciente';
+                const yaVisto    = item.vistoPor?.includes(data.user?.nombre);
+                const puedeElim  = isAdmin || data.user?.email === item.encargadoEmail;
+
+                return (
+                  <div key={item.id} className={styles.histCard} style={{ '--hc-accent': statusOpt?.color || '#6b7280', animationDelay: `${idx * 0.05}s` }}>
+                    {/* Foto */}
+                    {item.fotoUrl ? (
+                      <div className={styles.histPhotoWrap}>
+                        <img src={item.fotoUrl} alt="Evidencia" className={styles.histPhoto} />
+                        {statusOpt && (
+                          <div className={styles.histPhotoBadge} style={{ background: statusOpt.bg, color: statusOpt.color, borderColor: statusOpt.border }}>
+                            <span className={styles.histBadgeDot} style={{ background: statusOpt.dot }} />
+                            {statusOpt.label}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className={styles.histNoPhoto}>
+                        <svg viewBox="0 0 24 24" fill="none" width="28" height="28"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#9ca3af" strokeWidth="1.5"/><circle cx="12" cy="13" r="4" stroke="#9ca3af" strokeWidth="1.5"/></svg>
+                      </div>
+                    )}
+
+                    {/* Contenido */}
+                    <div className={styles.histBody}>
+                      <div className={styles.histTop}>
+                        <div>
+                          <h3 className={styles.histLote}>{loteName}</h3>
+                          <p className={styles.histDate}>🕐 {dateStr}</p>
+                        </div>
+                        {!item.fotoUrl && statusOpt && (
+                          <span className={styles.histStatusPill} style={{ background: statusOpt.bg, color: statusOpt.color }}>
+                            {statusOpt.label}
+                          </span>
+                        )}
+                      </div>
+
+                      {item.observaciones && (
+                        <p className={styles.histObs}>"{item.observaciones}"</p>
+                      )}
+
+                      <div className={styles.histFooter}>
+                        <div className={styles.histUser}>
+                          <div className={styles.histAvatar}>{item.encargado?.charAt(0)?.toUpperCase() || '?'}</div>
+                          <div>
+                            <p className={styles.histUserName}>{item.encargado}</p>
+                            {item.vistoPor?.length > 0 && (
+                              <p className={styles.histVisto}>Visto por {item.vistoPor.length} persona{item.vistoPor.length > 1 ? 's' : ''}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className={styles.histActions}>
+                          {!yaVisto && (
+                            <button className={styles.histBtnSec} onClick={() => handleMarcarVisto(item.id)}>
+                              <svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/></svg>
+                              Visto
+                            </button>
+                          )}
+                          {puedeElim && (
+                            <button className={styles.histBtnDanger} onClick={() => handleDelete(item.id)}>
+                              <svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                              Solucionado
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       )}

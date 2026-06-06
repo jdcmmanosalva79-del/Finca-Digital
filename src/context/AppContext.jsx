@@ -23,6 +23,7 @@ const INITIAL_DATA = {
   activeCrops: [],
   inventoryItems: [],
   weather: null,
+  forecast: [],
 };
 
 export function AppProvider({ children, currentUser }) {
@@ -61,9 +62,11 @@ export function AppProvider({ children, currentUser }) {
   }, [currentUser]);
 
   useEffect(() => {
+    console.log('AppContext: Iniciando carga de datos...');
     // 1. Dashboard Main Data (Stats)
     const docRef = doc(db, 'dashboard', 'mainData');
     const unsubscribeMain = onSnapshot(docRef, (docSnap) => {
+      console.log('AppContext: Datos principales recibidos');
       if (docSnap.exists()) {
         const firestoreData = docSnap.data();
         setData(prev => ({
@@ -83,6 +86,7 @@ export function AppProvider({ children, currentUser }) {
     // 2. Active Crops Subscription
     const qCrops = query(collection(db, 'crops'), where('estado', '==', 'activo'));
     const unsubscribeCrops = onSnapshot(qCrops, (snap) => {
+      console.log('AppContext: Cultivos recibidos, count:', snap.size);
       const activeCrops = [];
       const statsPorRubro = {};
 
@@ -126,6 +130,7 @@ export function AppProvider({ children, currentUser }) {
           'cultivos-activos': { count: snap.size }
         }
       }));
+      console.log('AppContext: Estableciendo loading a false');
       setLoading(false);
     });
 
@@ -150,40 +155,87 @@ export function AppProvider({ children, currentUser }) {
     };
   }, []);
 
-  // 4. Weather Sync
+  // 4. Weather Sync — La Yuca, Barinas, Venezuela
   useEffect(() => {
     const fetchWeather = async () => {
-      const API_KEY = import.meta.env.VITE_OPENWEATHER_KEY || 'c403306634455f5e8a6a68f051e94411'; 
-      const lat = 8.6226;
-      const lon = -70.2045;
-      
+      const API_KEY = import.meta.env.VITE_OPENWEATHER_KEY || 'c403306634455f5e8a6a68f051e94411';
+      // Coordenadas precisas de La Yuca, Barinas, Venezuela
+      const lat = 8.5833;
+      const lon = -70.3000;
+
       try {
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`);
-        if (!response.ok) throw new Error('Weather API error');
-        const weatherData = await response.json();
-        
+        // Clima actual
+        const [currentRes, forecastRes] = await Promise.all([
+          fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`),
+          fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es&cnt=40`)
+        ]);
+
+        if (!currentRes.ok) throw new Error('Weather API error');
+        const weatherData = await currentRes.json();
+        const forecastData = forecastRes.ok ? await forecastRes.json() : null;
+
+        // Procesar pronóstico: un punto por día (mediodía) para 7 días
+        let forecast = [];
+        if (forecastData && forecastData.list) {
+          const dayMap = {};
+          forecastData.list.forEach(item => {
+            const date = new Date(item.dt * 1000);
+            const dayKey = date.toLocaleDateString('es-VE', { weekday: 'short' });
+            const dateStr = date.toISOString().split('T')[0];
+            if (!dayMap[dateStr]) {
+              dayMap[dateStr] = {
+                day: dayKey.charAt(0).toUpperCase() + dayKey.slice(1),
+                icon: item.weather[0].icon,
+                temp: Math.round(item.main.temp),
+                tempMin: Math.round(item.main.temp_min),
+                tempMax: Math.round(item.main.temp_max),
+                pop: Math.round((item.pop || 0) * 100)
+              };
+            }
+          });
+          forecast = Object.values(dayMap).slice(0, 7);
+        }
+
         setData(prev => ({
           ...prev,
           weather: {
             temp: Math.round(weatherData.main.temp),
+            feelsLike: Math.round(weatherData.main.feels_like),
+            tempMin: Math.round(weatherData.main.temp_min),
+            tempMax: Math.round(weatherData.main.temp_max),
             condition: weatherData.weather[0].description,
             icon: weatherData.weather[0].icon,
             humidity: weatherData.main.humidity,
-            pop: weatherData.clouds.all, 
-            city: weatherData.name
-          }
+            pop: weatherData.clouds.all,
+            windSpeed: Math.round((weatherData.wind?.speed || 0) * 3.6), // m/s → km/h
+            windDir: weatherData.wind?.deg || 0,
+            city: 'La Yuca, Barinas',
+            pressure: weatherData.main.pressure,
+            visibility: weatherData.visibility ? Math.round(weatherData.visibility / 1000) : null,
+            lastUpdated: new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' })
+          },
+          forecast
         }));
       } catch (err) {
         console.error("Weather Fetch Error:", err);
         setData(prev => ({
           ...prev,
-          weather: { temp: 29, condition: 'Parcialmente nublado', icon: '02d', humidity: 60, pop: 10, city: 'Barinas' }
+          weather: { temp: 30, condition: 'Parcialmente nublado', icon: '02d', humidity: 72, pop: 20, windSpeed: 14, city: 'La Yuca, Barinas', lastUpdated: '--:--' },
+          forecast: [
+            { day: 'Lun', icon: '02d', temp: 31, tempMin: 23, tempMax: 33, pop: 15 },
+            { day: 'Mar', icon: '10d', temp: 28, tempMin: 22, tempMax: 30, pop: 65 },
+            { day: 'Mié', icon: '04d', temp: 29, tempMin: 22, tempMax: 31, pop: 30 },
+            { day: 'Jue', icon: '01d', temp: 33, tempMin: 24, tempMax: 35, pop: 5 },
+            { day: 'Vie', icon: '10d', temp: 27, tempMin: 21, tempMax: 29, pop: 80 },
+            { day: 'Sáb', icon: '04d', temp: 30, tempMin: 22, tempMax: 32, pop: 20 },
+            { day: 'Dom', icon: '01d', temp: 32, tempMin: 23, tempMax: 34, pop: 10 },
+          ]
         }));
       }
     };
 
     fetchWeather();
-    const interval = setInterval(fetchWeather, 1800000); 
+    const interval = setInterval(fetchWeather, 10 * 60 * 1000); // Actualizar cada 10 minutos
     return () => clearInterval(interval);
   }, []);
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { AppProvider } from './context/AppContext';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebase';
+import { auth, firebaseError } from './firebase';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
@@ -17,6 +17,7 @@ import Inventario from './components/Inventario';
 import SoilHealth from './components/SoilHealth';
 import TaskBoard from './components/TaskBoard';
 import SecurityQuestionsSetup from './components/SecurityQuestionsSetup';
+import FirebaseErrorScreen from './components/FirebaseErrorScreen';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import './index.css';
@@ -69,7 +70,7 @@ function AppContent({ user, userRole, securitySetupNeeded, setSecuritySetupNeede
   );
 }
 
-function App() {
+function FincaDigitalApp() {
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -157,6 +158,13 @@ function App() {
       />
     </AppProvider>
   );
+}
+
+function App() {
+  if (firebaseError) {
+    return <FirebaseErrorScreen error={firebaseError} />;
+  }
+  return <FincaDigitalApp />;
 }
 
 export default App;
